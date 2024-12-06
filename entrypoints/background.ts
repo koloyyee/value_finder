@@ -1,6 +1,6 @@
 import { Collection } from "./popup/utils";
 
-export default defineBackground(async () => {
+export default defineBackground(() => {
 
 	getTicker();
 });

@@ -1,7 +1,8 @@
-import { BASE, Collection, Screeners, StorageImp } from "./utils";
+import { BASE, extractTicker, Screeners, ScreenerStorage } from "./utils";
+
 
 const ScreenerSaver: React.FC = () => {
-	const screenerStorage = new StorageImp(Collection.screeners);
+	const screenerStorage = new ScreenerStorage(chrome.storage.local);
 
 	const [screeners, setScreeners] = useState<Screeners>({});
 	const [currTicker, setCurrTicker] = useState<string>("");
@@ -9,14 +10,16 @@ const ScreenerSaver: React.FC = () => {
 	const [secUrl, setSecUrl] = useState("");
 	const [isFinvizPage, setIsFinvizPage] = useState(false);
 
+
+
 	useEffect(() => {
 		(async () => {
-			const [tab] = await chrome.tabs.query({ active: true });
+			const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 			if (tab.url!.includes("quote.ashx")) {
+				setCurrTicker((extractTicker(tab.url!) ?? ""))
 				const port = chrome.runtime.connect({ name: "ticker" })
 				port.onMessage.addListener(msg => {
 					setSecUrl(msg.url);
-					setCurrTicker(msg.ticker)
 				})
 
 				return () => {
@@ -71,7 +74,8 @@ const ScreenerSaver: React.FC = () => {
 		}, 1000)
 	}
 
-	const removeItem = async (key: string) => {
+	const removeItem = async (event: React.FormEvent<HTMLFormElement>, key: string) => {
+		event.preventDefault();
 		await screenerStorage.del(key)
 		renderList();
 	};
@@ -100,13 +104,13 @@ const ScreenerSaver: React.FC = () => {
 	return (
 		<div>
 			{currTicker && (
-				<p>
-					<a href={secUrl} target="_blank"> {currTicker.toUpperCase()} <br /> Quart. & Annual Fillings</a>
-				</p>
+				<div className="p-2 m-3 border-2 border-emerald-600 rounded">
 
+					<a href={secUrl} target="_blank"> {currTicker.toUpperCase()} Quarter & Annual Fillings Fillings </a>
+				</div>
 			)}
 			<p id="errorMsg" className=" text-red-600" aria-label='error-message'> {errorMsg} </p>
-			<section>
+			<section className="p-2 m-3 border-2 border-emerald-600 rounded">
 				<form
 					id="favoritesForm"
 					onSubmit={favoritesFormHandler}
@@ -116,36 +120,41 @@ const ScreenerSaver: React.FC = () => {
 						type="text"
 						name="screener"
 						id="screener"
-						placeholder="Screener Name"
+						placeholder="Input New Screener"
 						className='py-2 rounded'
 						required
 					/>
 					<button type="submit">Save</button>
 				</form>
 
-				<ul id="list" className="mt-4">
+				<h3 className="text-lg font-bold" >Screeners </h3>
+				<div className="mt-4 h-48 overflow-y-auto">
+
 					{Object.keys(screeners).length > 0 ? (
-						Object.entries(screeners).map(([k, v]) => (
-							<li key={k} id={`item-${k}`} className="flex gap-3 items-center">
-								<a href={v} target="_blank" rel="noopener noreferrer" className="text-[1.1rem]">
-									{k}
-								</a>
-								<form
-									id={`removeItem-${k}`}
-									onSubmit={(e) => {
-										e.preventDefault();
-										removeItem(k);
-									}}
-								>
-									<button
-										type="submit"
-										className="hover:border-red-400"
-									>
-										🗑️
-									</button>
-								</form>
-							</li>
-						))
+						<>
+							<ul className="w-full grid grid-cols-2 grid-rows-5 justify-between items-center">
+								{Object.entries(screeners).map(([k, v]) => (
+									<li key={k} id={`item-${k}`} className="flex gap-3 items-center">
+										<form
+											className=""
+											id={`removeItem-${k}`}
+											onSubmit={(e) => removeItem(e, k)}>
+											<div className="">
+												<a href={v} target="_blank" rel="noopener noreferrer" className="">
+													{k}
+												</a>
+												<button
+													type="submit"
+													className="hover:border-red-400"
+												>
+													🗑️
+												</button>
+											</div>
+										</form>
+									</li>
+								))}
+							</ul>
+						</>
 					) : (
 						<div>
 							<p>The watchlist is empty :(</p>
@@ -154,7 +163,7 @@ const ScreenerSaver: React.FC = () => {
 							</a>
 						</div>
 					)}
-				</ul>
+				</div>
 
 				{Object.keys(screeners).length > 0 && (
 					<button
@@ -165,7 +174,11 @@ const ScreenerSaver: React.FC = () => {
 						Clear List
 					</button>
 				)}
-				<hr className='my-4' />
+
+			</section>
+			<hr className='my-4' />
+			<section className="m-3 border-2 border-emerald-500 rounded p-2 flex">
+				<h3 className="text-md font-bold m-3">Comp. Fundamentals</h3>
 				<form
 					id="tickerForm"
 					onSubmit={tickerFormHandler}
@@ -178,7 +191,7 @@ const ScreenerSaver: React.FC = () => {
 						className="py-2 rounded"
 						required
 					/>
-					<button type="submit">Go to Quote</button>
+					<button type="submit">Search by Ticker</button>
 				</form>
 			</section>
 		</div>

@@ -8,7 +8,14 @@ export default defineConfig({
 		permissions : [
 			"storage",
 			"activeTab",
-			"tabs"
-		]
+			"tabs",
+			"sidePanel"
+		],
+		side_panel : {
+			default_path : "/sidepanel.html"
+		},
+		action :{
+			"default_title": "Click to open panel"
+		}
 	}
 });

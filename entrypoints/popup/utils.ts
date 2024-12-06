@@ -1,89 +1,113 @@
-// import { renderList } from "./main";
+/** Types  */
+export const Collection = {
+	screeners: "screeners" as const,
+	bookmarks: "bookmarks" as const
+} as const
 
+/**
+ * bookmarks : [
+ * 	aapl : [
+ * 		"link1",
+ * 		"link2"
+ * 	],
+ * 	pltr : [
+ * 		"link1",
+ * 		"link2"
+ * 	]
+ * ]
+ */
+export interface Bookmarks {
+	[ticker: string]: [string]
+}
+
+/**
+ * watchlists : [
+ * 	uniqueScreenerName: uniqueScreenerUrl,
+ * 	uniqueScreenerName2: uniqueScreenerUrl2,
+ * ]
+ */
+export interface Screeners {
+	[screener: string]: string
+}
+/** Logics  **/
 export const BASE = "https://finviz.com/screener.ashx";
 
-async function save(screener: string, link: string) {
-	const local = chrome.storage.local;
-	const coll = await get(screener);
-	const collByVal = await getByVal(link);
-	console.log({coll})
-	console.log({collByVal})
-	const val = collByVal?.map(val => Object.values(val)[0])
-		.filter(value => value === link)
-
-	if (link === BASE) {
-		return { err: "Your screener filter is empty." }
+interface Storage {
+	save(key: string, link: string): Promise<{ err: string } | { err: null }>;
+	get(params: { key?: string, url?: string }): Promise<any>;
+	del(key: string): Promise<void>;
+	clear(): Promise<void>;
+}
+export class StorageImp implements Storage {
+	private collectionName: string
+	constructor(collectionName: "screeners" | "bookmarks") {
+		this.collectionName = collectionName;
 	}
-	if (coll[screener] !== undefined) {
-		return { err: "Screener Name existed already." }
+	/**
+	 * 
+	 * @param key screener name or ticker for bookmarks
+	 * @param link 
+	 * @returns 
+	 */
+	async save(key: string, link: string) {
+		const url = await this.get({ key: key });
+		const scr = await this.get({ url: link });
+
+		if (link === BASE) {
+			return { err: "Your screener filter is empty." }
+		}
+		if (url !== undefined) {
+			return { err: "Screener Name existed already." }
+		}
+
+		if (scr !== undefined) {
+			return { err: "Screener Filter existed already." }
+		}
+
+		const collection = await chrome.storage.local.get(this.collectionName);
+		const targetCollection = collection[this.collectionName] || {};
+		await chrome.storage.local.set(
+			{ // TODO: this might a bug for Bookmarks
+				[this.collectionName]: {
+					...targetCollection, [key]: link
+				}
+			})
+		return { err: null }
 	}
-
-	console.log(val)
-	if (val !== undefined) {
-		return { err: "Screener Filter existed already." }
+	/**
+	 * When no argument, it will return full list of screeners.
+	 * input screener to check if screener exists and return url,
+	 * input url to check if url exists and return screener,
+	 *  
+	 */
+	async get({ key = "", url = "" } = {}): Promise<Screeners | Bookmarks | string | undefined> {
+		const collection = await chrome.storage.local.get(this.collectionName)
+		if (key.trim() === "" && url.trim() === "") {
+			return collection[this.collectionName];
+		} else if (key.trim() === "") {
+			return Object.keys(collection[this.collectionName])
+				.filter(key => collection[this.collectionName][key] === url)[0]
+		} else if (url.trim() === "") { // return the screener url
+			try {
+				return collection[this.collectionName][key];
+			} catch (e) {
+				return undefined;
+			}
+		}
 	}
+	async del(key: string) {
+		const collection = await chrome.storage.local.get(this.collectionName);
+		const targetCollection = collection[this.collectionName] || {};
 
-	await local.set({ [screener]: link });
-	return { err: null }
+		delete targetCollection[key];
 
-	// await chrome.storage.local.onChanged.addListener((changes, namespace) => {
-	// 	for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-	// 		console.log(
-	// 			`Storage key "${key}" in namespace "${namespace}" changed.`,
-	// 			`Old value was "${oldValue}", new value is "${newValue}".`
-	// 		);
-	// 	}
-	// 	console.log({ changes, namespace })
-	// })
-
-}
-async function existed(screener: string, link: string) {
-	const coll = await get(screener);
-	const collByVal = await getByVal(link);
-	const val = collByVal?.values().find(v => v === link);
-	return coll[screener] !== undefined && val !== undefined
-
-}
-async function get(key: string = "") {
-	// const s = await storage.getItem(`local:${key}`)
-	// console.log({ s })
-	return await chrome.storage.local.get(key === "" ? null : key);
-}
-
-async function getByVal(value: string) {
-	const coll = await chrome.storage.local.get();
-	if (!Object.keys(coll).length) return;
-	const obj = Object.keys(coll)
-		.filter((key) => coll[key] === value)
-		.map(key => Object.assign({ [key]: coll[key] }))
-	console.log({ obj })
-	return obj
-}
-
-async function clear() {
-	await chrome.storage.local.clear();
-}
-
-async function remove(key: string) {
-	await chrome.storage.local.remove(key);
-}
-
-
-export const local = {
-	save,
-	get,
-	getByVal,
-	clear,
-}
-
-function renderErrorMsg(message: string, insertAfterElement: Element) {
-
-	const errorMsg = document.getElementById("error-message");
-	errorMsg!.style.color = "red";
-	errorMsg!.innerText = message;
-	insertAfterElement?.insertAdjacentElement("afterend", errorMsg!);
-
-	setTimeout(() => {
-		errorMsg!.textContent = ""
-	}, 3000)
+		await chrome.storage.local.set({
+			[this.collectionName]: targetCollection
+		});
+	}
+	async clear() {
+		await chrome.storage.local.set({
+			[this.collectionName]: {}
+		});
+	}
 }

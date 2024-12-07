@@ -102,7 +102,7 @@ export class BookmarksStorageImp implements Storage {
 	async get({ key = "", bookmarkKV = {} as BookmarkKV } = {}): Promise<Bookmarks | {} | undefined> {
 		// get all.
 		const collection = await this.storage.get(this.collectionName);
-		const bookmarksColl = collection[this.collectionName];
+		const bookmarksColl = collection[this.collectionName] || {};
 
 		if (key.trim() === "" && Object.keys(bookmarkKV).length === 0) {
 			return bookmarksColl;
@@ -119,9 +119,7 @@ export class BookmarksStorageImp implements Storage {
 				...bookmarksColl,
 				[key]: { [bookmarkKey]: bookmarkValue }
 			} : undefined;
-		}
-
-		else if (Object.keys(bookmarkKV).length === 0) {
+		} else if (Object.keys(bookmarkKV).length === 0) {
 
 			return Object.keys(bookmarksColl)
 				.filter(ticker => ticker === key)
@@ -205,7 +203,7 @@ export class ScreenerStorage implements Storage {
 	 */
 	async get({ key = "", url = "" } = {}): Promise<Screeners | undefined> {
 		const collection = await this.storage.get(this.collectionName)
-		const screenerColl = collection[this.collectionName];
+		const screenerColl = collection[this.collectionName] || {};
 
 		if (key.trim() === "" && url.trim() === "") {
 			return screenerColl;
@@ -216,7 +214,7 @@ export class ScreenerStorage implements Storage {
 
 		} else if (url.trim() === "") { // return the screener url
 			return Object.keys(screenerColl)
-				.filter(k => k === key)
+				.filter(k => k.toLowerCase() === key.toLowerCase())
 				.reduce((acc, curr) => Object.assign(acc, { curr: screenerColl[key] }), {})
 		}
 	}

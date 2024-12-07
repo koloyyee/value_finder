@@ -52,7 +52,7 @@ const App: React.FC = () => {
 		// 		{activeTab === Collection.bookmarks && <SecBookmarks />}
 		// 	</TabContent>
 		// </div>
-		<div  className="border-2 border-emerald-500 rounded h-[100vh]">
+		<div  className="border-2 border-emerald-500 rounded h-full">
 			<ScreenerSaver  />
 			<hr />
 			<SecBookmarks />

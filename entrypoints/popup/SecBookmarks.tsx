@@ -42,16 +42,16 @@ const SecBookmarks: React.FC = () => {
 		renderList()
 	}
 	return (
-		<>
-			<button type="button" onClick={() => window.prompt()}>open</button>
+		<div className="m-2 p-3 border-2 border-emerald-500 rounded ">
+			{/* <button type="button" onClick={() => window.prompt()}>open</button> */}
 			<p className="text-red-500">{errorMsg}</p>
-			<form onSubmit={saveBookmark}>
-				<input name="ticker" placeholder="Ticker" className="py-2 rounded" required />
+			<form onSubmit={saveBookmark} className="flex gap-3">
+				<input name="ticker" placeholder="Ticker" className="py-2 rounded w-1/5" required />
 				<input name="bookmarkName" placeholder="Bookmark name e.g.: 2023-10q" className="py-2 rounded" required />
 				<button> bookmark </button>
 			</form>
 			{bookmarks.size > 0 ?
-				<ul >
+				<ul className="h-36 overflow-y-auto grid grid-cols-2">
 					{Array.from(bookmarks.entries()).map(([ticker, bookmarkList], index) => (
 						<li key={ticker + index}>
 							<h4 className="font-bold" >{ticker}</h4>
@@ -73,7 +73,7 @@ const SecBookmarks: React.FC = () => {
 				</>
 			}
 
-		</>);
+		</div>);
 }
 
 export default SecBookmarks;

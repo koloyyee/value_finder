@@ -103,14 +103,8 @@ const ScreenerSaver: React.FC = () => {
 
 	return (
 		<div>
-			{currTicker && (
-				<div className="p-2 m-3 border-2 border-emerald-600 rounded">
-
-					<a href={secUrl} target="_blank"> {currTicker.toUpperCase()} Quarter & Annual Fillings Fillings </a>
-				</div>
-			)}
 			<p id="errorMsg" className=" text-red-600" aria-label='error-message'> {errorMsg} </p>
-			<section className="p-2 m-3 border-2 border-emerald-600 rounded">
+			<section className="p-4 m-3 border-2 border-emerald-600 rounded">
 				<form
 					id="favoritesForm"
 					onSubmit={favoritesFormHandler}
@@ -176,23 +170,35 @@ const ScreenerSaver: React.FC = () => {
 				)}
 
 			</section>
-			<hr className='my-4' />
-			<section className="m-3 border-2 border-emerald-500 rounded p-2 flex">
-				<h3 className="text-md font-bold m-3">Comp. Fundamentals</h3>
-				<form
-					id="tickerForm"
-					onSubmit={tickerFormHandler}
-					className="flex gap-3"
-				>
-					<input
-						type="text"
-						name="ticker"
-						placeholder="Enter Ticker"
-						className="py-2 rounded"
-						required
-					/>
-					<button type="submit">Search by Ticker</button>
-				</form>
+			<section className="m-3 p-4 border-2 border-emerald-500 rounded">
+
+				<div className="flex items-center gap-3">
+					<h3 className="text-md font-bold">Comp. Fundamentals</h3>
+					<form
+						id="tickerForm"
+						onSubmit={tickerFormHandler}
+						className="flex gap-3"
+					>
+						<input
+							type="text"
+							name="ticker"
+							placeholder="Enter Ticker"
+							className="py-2 rounded"
+							required
+						/>
+						<button type="submit">Search by Ticker</button>
+					</form>
+
+				</div>
+
+				{currTicker && (
+					<>
+						<hr className='my-2' />
+						<div className="p-2 m-3 border-b-2 border-emerald-600 rounded">
+							<a href={secUrl} target="_blank"> {currTicker.toUpperCase()} Quarter & Annual Fillings Fillings </a>
+						</div>
+					</>
+				)}
 			</section>
 		</div>
 	);

@@ -9,10 +9,6 @@ export default defineContentScript({
 			passingTicker(url);
 		}
 		// getSelection();
-		document.addEventListener("onmouseup", (e) => {
-			console.log(e)
-		})
-		console.log("hello")
 		document.onmouseup = getSelection
 	}
 });
@@ -32,8 +28,9 @@ function passingTicker(url: string) {
 
 function getSelection() {
 	let capturedText = document.getSelection()?.toString();
-	// document.onmouseup = grapSelect
-	msgPassing({ portName: "textHighlight", msg: capturedText })
+	if (capturedText?.trim() !== "") {
+		msgPassing({ portName: "textHighlight", msg: capturedText })
+	}
 }
 
 function msgPassing({ portName = "", msg = "" }) {

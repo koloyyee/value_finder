@@ -7,18 +7,6 @@ export default defineBackground(() => {
 
 	chrome.runtime.onInstalled.addListener(() => {
 		contextMenuOpenPanel();
-		chrome.contextMenus.create({
-			id: 'addToNote',
-			title: 'Add to Note',
-			contexts: ['all']
-		});
-		chrome.contextMenus.onClicked.addListener((info, tab) => {
-			if (!tab || !tab.id) return;
-			if (info.menuItemId === 'addToNote') {
-				chrome.sidePanel.open({ tabId: tab.id, windowId: tab.windowId });
-			}
-		})
-		// }
 	})
 
 });

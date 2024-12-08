@@ -1,8 +1,11 @@
+import { ChangeEvent } from "react";
+
 function SidePanel() {
 
 	const [currUrl, setCurrUrl] = useState("")
 	const [ticker, setTicker] = useState("")
 	const [highlightedText, setHighlightedText] = useState("");
+	const [note, setNote] = useState("")
 
 	useEffect(() => {
 		function getHighlighted() {
@@ -37,13 +40,40 @@ function SidePanel() {
 
 	}, [])
 
+	function handleTextarea(e: ChangeEvent<HTMLTextAreaElement>): void {
+		const text = e.currentTarget.value;
+		setNote(text)
+	}
+
+	function clearForm(): void {
+		setHighlightedText("")
+		setNote("")
+	}
+	function saveNote(e: React.FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		const form = e.currentTarget;
+		const formData = new FormData(form);
+		const highlightedText = String(formData.get("highlightedText"))
+		const note = String(formData.get("note"))
+
+		console.log({ highlightedText, note, currUrl, ticker })
+
+	}
+
 	return (
 
 		<main>
 			<h1>{ticker.toUpperCase()}</h1>
-			<textarea value={`"${highlightedText}`}>
-		
+			<form onSubmit={(e) => saveNote(e)}>
+			<input type="hidden" value={highlightedText} name="highlightedText" />
+			<blockquote>
+				{highlightedText}
+			</blockquote>
+			<textarea name="note" value={note} onChange={(e) => handleTextarea(e)}>
 			</textarea>
+			<button>save</button>
+			<button type="reset" onClick={() => clearForm()}>clear</button>
+			</form>
 		</main>
 	)
 }

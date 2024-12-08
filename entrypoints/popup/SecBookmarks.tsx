@@ -1,6 +1,10 @@
 import { BookmarksStorageImp } from "../storage";
 import { Bookmarks } from "../types";
 
+/**
+ * TODO: Missing delete bookmark!
+ * 
+ */
 
 const SecBookmarks: React.FC = () => {
 	const bookmarksStorage = new BookmarksStorageImp(chrome.storage.local);
@@ -43,6 +47,20 @@ const SecBookmarks: React.FC = () => {
 		}
 		renderList()
 	}
+
+	async function removeBookmark(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		const form = event.currentTarget;
+		const formData = new FormData(form);
+		const url = String(formData.get("url"))
+		const ticker = String(formData.get("ticker"))
+		const bookmarkName = String(formData.get("bookmarkName"))
+
+		console.log({ url, bookmarkName, ticker })
+		await bookmarksStorage.del(ticker, bookmarkName, url)
+		renderList();
+	}
+
 	return (
 		<div className="m-2 p-3 border-2 border-emerald-500 rounded ">
 			{/* <button type="button" onClick={() => window.prompt()}>open</button> */}
@@ -61,7 +79,13 @@ const SecBookmarks: React.FC = () => {
 								{bookmarkList.map((bookmark, i) => (
 									<li key={i}>
 										{Object.keys(bookmark).map((name, i) => (
-											<a href={bookmark[name]} key={i} target="_blank"> {name} </a>
+											<form onSubmit={(e)=> removeBookmark(e)} key={name + i}>
+												<a href={bookmark[name]} key={i} target="_blank"> {name} </a>
+												<input name="url" type="hidden" value={bookmark[name]} />
+												<input name="ticker" type="hidden" value={ticker} />
+												<input name="bookmarkName" type="hidden" value={name} />
+												<button> ❌</button>
+											</form>
 										))}
 									</li>
 								))}

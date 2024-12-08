@@ -1,7 +1,7 @@
 import { BookmarkKV, Bookmarks, Collection, Screeners } from "./types";
 
 export default defineUnlistedScript(() => {
-	
+
 })
 
 /** Logics  **/
@@ -9,8 +9,8 @@ export const BASE = "https://finviz.com/screener.ashx";
 
 interface Storage {
 	save(key: string, link: { [key: string]: string } | string): Promise<{ err: string } | { err: null }>;
-	get(params: { key?: string, value?: { [ticker: string]: string } | string }): Promise<any>;
-	del(key: string): Promise<void>;
+	get(params: { key?: string, value?: { [ticker: string]: string } | string }): Promise<Screeners | Bookmarks | undefined>;
+	del(key: string): Promise<{ err: null | string }>;
 	clear(): Promise<void>;
 }
 
@@ -25,11 +25,11 @@ export class BookmarksStorageImp implements Storage {
 
 	async save(key: string, bookmarkKV: { [name: string]: string }): Promise<{ err: string; } | { err: null; }> {
 		console.log(bookmarkKV)
-		const byTicker = await this.get({ key: key }) ;
+		const byTicker = await this.get({ key: key });
 		const byLink = await this.get({ bookmarkKV: bookmarkKV });
 		console.log(byTicker, byLink)
 		console.log(byLink === undefined)
-		
+
 		// if (byTicker !== undefined ) {
 		// 	return { err: "Something is wrong with the Ticker." }
 		// }
@@ -42,7 +42,7 @@ export class BookmarksStorageImp implements Storage {
 		const bookmarksColl = collection[this.collectionName] || {};
 
 		let collNewVal = {};
-		if (Object.keys(byTicker ?? {}).length === 0 ) {
+		if (Object.keys(byTicker ?? {}).length === 0) {
 			console.log("new ticker ")
 			collNewVal = {
 				[this.collectionName]: {
@@ -50,9 +50,7 @@ export class BookmarksStorageImp implements Storage {
 					[key]: [bookmarkKV]
 				}
 			}
-			console.log(collNewVal)
 		} else {
-			console.log("ticker existed")
 			collNewVal = {
 				[this.collectionName]: {
 					...bookmarksColl,
@@ -103,24 +101,42 @@ export class BookmarksStorageImp implements Storage {
 	 * the urls will also be removed.
 	 * @param key 
 	 */
-	async del(key: string): Promise<void> {
-		const collection = await this.storage.get(this.collectionName);
-		const bookmarksColl = collection[this.collectionName] || {};
-		bookmarksColl[key]
-		await this.storage.set({
-			[this.collectionName]: bookmarksColl
-		});
+	// async del(key: string): Promise<void> {
+	// 	const collection = await this.storage.get(this.collectionName);
+	// 	const bookmarksColl = collection[this.collectionName] || {};
+	// 	bookmarksColl[key]
+	// 	await this.storage.set({
+	// 		[this.collectionName]: bookmarksColl
+	// 	});
+	// }
+
+	async del(ticker = "", bookmarkName = "", url = "") {
+		try {
+			const collection = await this.storage.get();
+			const bookmarkColl = collection[this.collectionName]
+			const targetTicker = bookmarkColl[ticker]
+
+			if (targetTicker) {
+				const index = targetTicker.findIndex((bookmarkKV: BookmarkKV) => {
+					return Object.keys(bookmarkKV)[0] === bookmarkName && bookmarkKV[bookmarkName] === url
+				})
+				if (index !== -1) {
+					bookmarkColl[ticker].splice(index, 1);
+					if (bookmarkColl[ticker].length === 0) {
+						delete bookmarkColl[ticker];
+					}
+					await this.storage.set({
+						[this.collectionName]: bookmarkColl
+					})
+				}
+			}
+			return { err: null }
+		} catch (e) {
+			console.error(e)
+			return { err: "Unable to delete" }
+		}
 	}
 
-	// async delByUrl(url: string) {
-	// 	const collection = await this.storage.get(this.collectionName);
-	// 	const bookmarksColl = collection[this.collectionName];
-	// 	const byUrl = this.get({ bookmarkKV: url })
-	// 	if (byUrl === undefined || Object.keys(byUrl).length === 0) {
-	// 		console.error("Url doesn't exist.")
-	// 		return;
-	// 	}
-	// }
 	clear(): Promise<void> {
 		throw new Error("Method not implemented.");
 	}
@@ -192,12 +208,16 @@ export class ScreenerStorage implements Storage {
 	async del(key: string) {
 		const collection = await this.storage.get(this.collectionName);
 		const targetCollection = collection[this.collectionName] || {};
-
-		delete targetCollection[key];
-
-		await this.storage.set({
-			[this.collectionName]: targetCollection
-		});
+		try {
+			delete targetCollection[key];
+			await this.storage.set({
+				[this.collectionName]: targetCollection
+			});
+			return { err: null }
+		} catch (e) {
+			console.error(e)
+			return { err: "Unable to delete" }
+		}
 	}
 	async clear() {
 		await this.storage.set({

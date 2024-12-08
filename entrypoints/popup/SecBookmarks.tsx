@@ -56,13 +56,17 @@ const SecBookmarks: React.FC = () => {
 		const ticker = String(formData.get("ticker"))
 		const bookmarkName = String(formData.get("bookmarkName"))
 
-		console.log({ url, bookmarkName, ticker })
-		await bookmarksStorage.del(ticker, bookmarkName, url)
-		renderList();
+		if (!url && !ticker && !bookmarkName) return;
+		const { err } = await bookmarksStorage.del(ticker, bookmarkName, url)
+		if (err !== null) {
+			setErrorMsg(err);
+			return;
+		}
+			renderList();
 	}
 
 	return (
-		<div className="m-2 p-3 border-2 border-emerald-500 rounded ">
+		<div className="m-2 p-3 border-2 border-emerald-600 rounded ">
 			{/* <button type="button" onClick={() => window.prompt()}>open</button> */}
 			<p className="text-red-500">{errorMsg}</p>
 			<form onSubmit={saveBookmark} className="flex gap-3">
@@ -79,7 +83,7 @@ const SecBookmarks: React.FC = () => {
 								{bookmarkList.map((bookmark, i) => (
 									<li key={i}>
 										{Object.keys(bookmark).map((name, i) => (
-											<form onSubmit={(e)=> removeBookmark(e)} key={name + i}>
+											<form onSubmit={(e) => removeBookmark(e)} key={name + i}>
 												<a href={bookmark[name]} key={i} target="_blank"> {name} </a>
 												<input name="url" type="hidden" value={bookmark[name]} />
 												<input name="ticker" type="hidden" value={ticker} />

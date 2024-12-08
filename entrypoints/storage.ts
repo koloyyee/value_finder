@@ -97,20 +97,11 @@ export class BookmarksStorageImp implements Storage {
 	}
 
 	/**
-	 * remove the by ticker, 
+	 * remove the by ticker, bookmarkName, url
 	 * the urls will also be removed.
 	 * @param key 
 	 */
-	// async del(key: string): Promise<void> {
-	// 	const collection = await this.storage.get(this.collectionName);
-	// 	const bookmarksColl = collection[this.collectionName] || {};
-	// 	bookmarksColl[key]
-	// 	await this.storage.set({
-	// 		[this.collectionName]: bookmarksColl
-	// 	});
-	// }
-
-	async del(ticker = "", bookmarkName = "", url = "") {
+	async del(ticker: string, bookmarkName = "", url = "") {
 		try {
 			const collection = await this.storage.get();
 			const bookmarkColl = collection[this.collectionName]

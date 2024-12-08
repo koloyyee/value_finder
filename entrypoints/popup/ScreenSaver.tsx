@@ -22,6 +22,7 @@ const ScreenerSaver: React.FC = () => {
 				setCurrTicker((extractTicker(tab.url!) ?? ""))
 				const port = chrome.runtime.connect({ name: "ticker" })
 				port.onMessage.addListener(msg => {
+					console.log({msg})
 					setSecUrl(msg.url);
 				})
 
@@ -173,7 +174,7 @@ const ScreenerSaver: React.FC = () => {
 				)}
 
 			</section>
-			<section className="m-3 p-4 border-2 border-emerald-500 rounded">
+			<section className="m-3 p-4 border-2 border-emerald-600 rounded">
 
 				<div className="flex items-center gap-3">
 					<h3 className="text-md font-bold">Comp. Fundamentals</h3>

@@ -7,19 +7,34 @@ export default defineBackground(() => {
 
 	chrome.runtime.onInstalled.addListener(() => {
 		contextMenuOpenPanel();
+		chrome.contextMenus.create({
+			id: 'addToNote',
+			title: 'Add to Note',
+			contexts: ['all']
+		});
+		chrome.contextMenus.onClicked.addListener((info, tab) => {
+			if (!tab || !tab.id) return;
+			if (info.menuItemId === 'addToNote') {
+				chrome.sidePanel.open({ tabId: tab.id, windowId: tab.windowId });
+			}
+		})
+		// }
 	})
 
 });
 
 function getTicker() {
 	chrome.runtime.onConnect.addListener((port) => {
-		port.onMessage.addListener(msg => {
-			if (msg.ticker) {
-				chrome.runtime.onConnect.addListener(port => {
-					port.postMessage({ ticker: String(msg.ticker), url: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`, from: "background" })
-				})
-			}
-		});
+		if (port.name === "ticker") {
+			port.onMessage.addListener(msg => {
+				console.log({ msg })
+				if (msg.ticker) {
+					chrome.runtime.onConnect.addListener(port => {
+						port.postMessage({ ticker: String(msg.ticker), url: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`, from: "background" })
+					})
+				}
+			});
+		}
 	});
 	(async () => {
 		screenersCollectionChecker();
@@ -70,6 +85,7 @@ function sidePanel() {
 			title: 'Open side panel',
 			contexts: ['all']
 		});
+
 	});
 
 	chrome.contextMenus.onClicked.addListener((info, tab) => {

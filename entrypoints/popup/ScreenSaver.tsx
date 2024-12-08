@@ -1,4 +1,7 @@
-import { BASE, extractTicker, Screeners, ScreenerStorage } from "./utils";
+import { BASE, ScreenerStorage } from "../storage";
+import { Screeners } from "../types";
+import { extractTicker } from "./utils";
+
 
 
 const ScreenerSaver: React.FC = () => {

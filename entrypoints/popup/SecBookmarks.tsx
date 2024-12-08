@@ -1,4 +1,6 @@
-import { Bookmarks, BookmarksStorageImp } from "./utils";
+import { BookmarksStorageImp } from "../storage";
+import { Bookmarks } from "../types";
+
 
 const SecBookmarks: React.FC = () => {
 	const bookmarksStorage = new BookmarksStorageImp(chrome.storage.local);

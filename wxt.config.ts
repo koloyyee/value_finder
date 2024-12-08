@@ -8,8 +8,9 @@ export default defineConfig({
 		permissions : [
 			"storage",
 			"activeTab",
-			// "tabs",
-			"sidePanel"
+			"tabs",
+			"sidePanel",
+			"contextMenus"
 		],
 		side_panel : {
 			default_path : "/sidepanel.html"

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 // import "./App.css";
+import { Collection } from '../types';
 import ScreenerSaver from './ScreenSaver';
 import SecBookmarks from './SecBookmarks';
-import { Collection } from "./utils";
 
 
 

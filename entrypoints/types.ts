@@ -1,12 +1,12 @@
-export default defineUnlistedScript(() => {
-	
-})
+export default defineUnlistedScript(() => {});
 
 /** Types  */
 export const Collection = {
-	screeners: "screeners" as const,
-	bookmarks: "bookmarks" as const
-} as const
+  screeners: "screeners" as const,
+  bookmarks: "bookmarks" as const,
+  mockScreeners: "mock_screeners" as const,
+  mockBookmarks: "mock_bookmarks" as const,
+} as const;
 
 /**
  * bookmarks : {
@@ -21,11 +21,11 @@ export const Collection = {
  * }
  */
 export interface Bookmarks {
-	[ticker: string]: BookmarkKV
+  [ticker: string]: BookmarkKV;
 }
 
 export interface BookmarkKV {
-	[bookmarkName: string]: string
+  [bookmarkName: string]: string;
 }
 
 /**
@@ -35,5 +35,5 @@ export interface BookmarkKV {
  * ]
  */
 export interface Screeners {
-	[screener: string]: string
+  [screener: string]: string;
 }

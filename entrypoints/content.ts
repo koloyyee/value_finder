@@ -13,14 +13,24 @@ export default defineContentScript({
 	}
 });
 
+// testing for separation.
+function passingCompanyUrl() {
+	const href = document.querySelector(".quote-header_ticker-wrapper_company")?.querySelector("a")?.getAttribute("href");
+	const port = chrome.runtime.connect({ name: "comp" });
+
+	if (href) {
+		port.postMessage({ from: "start from content passingCompanyUrl", companyUrl: href })
+	} else {
+		console.error("url not matched.")
+	}
+}
+
 function passingTicker(url: string) {
-	const port = chrome.runtime.connect({ name: "ticker" });
+	const href = document.querySelector(".quote-header_ticker-wrapper_company")?.querySelector("a")?.getAttribute("href");
+	const port = chrome.runtime.connect({ name: "comp" });
 	const ticker = extractTicker(url);
-	if (ticker) {
-		port.postMessage({ ticker, from: "content" })
-		port.onMessage.addListener(async msg => {
-			chrome.runtime.sendMessage({ url: msg.url, from: "content" })
-		})
+	if (ticker && href) {
+		port.postMessage({ ticker, from: "start from content passingTicker", companyUrl: href })
 	} else {
 		console.error("url not matched.")
 	}
@@ -29,13 +39,12 @@ function passingTicker(url: string) {
 function getSelection() {
 	let capturedText = document.getSelection()?.toString();
 	if (capturedText?.trim() !== "") {
-		msgPassing({ portName: "textHighlight", msg: capturedText })
+		const port = chrome.runtime.connect({ name: "textHighlight" })
+		port.postMessage({ text: capturedText, from: "content" })
 	}
 }
 
 function msgPassing({ portName = "", msg = "" }) {
-	// let m = getSelection();
-	// console.log(m)
 	const port = chrome.runtime.connect({ name: portName })
 	port.postMessage({ text: msg, from: "content" })
 }

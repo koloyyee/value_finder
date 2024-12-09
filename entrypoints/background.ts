@@ -2,7 +2,7 @@ import { Collection } from "./types";
 
 export default defineBackground(() => {
 
-	getTicker();
+	retransmit();
 
 
 	chrome.runtime.onInstalled.addListener(() => {
@@ -11,18 +11,26 @@ export default defineBackground(() => {
 
 });
 
-function getTicker() {
+function retransmit() {
 	chrome.runtime.onConnect.addListener((port) => {
-		if (port.name === "ticker") {
 			port.onMessage.addListener(msg => {
-				console.log({ msg })
+				// console.log(`TICKER: Received from content on port: ${port.name}`)
+				// console.log({ msg })
 				if (msg.ticker) {
 					chrome.runtime.onConnect.addListener(port => {
-						port.postMessage({ ticker: String(msg.ticker), url: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`, from: "background" })
+						// acting as a hub for passing messages to different port with the chrome.runtime
+						if (port.name === "comp") {
+							// console.log(`handled by background from port: ${port.name}`)
+							port.postMessage({ ticker: String(msg.ticker), url: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`, from: "ticker port - background", companyUrl: msg.companyUrl })
+						}
+						// if ( port.name === "comp") {
+						// 	console.log(`handled by background from port: ${port.name}`)
+						// 	port.postMessage({  from: "comp port - background", companyUrl: msg.companyUrl })
+						// }
+
 					})
 				}
 			});
-		}
 	});
 	(async () => {
 		screenersCollectionChecker();
@@ -30,7 +38,7 @@ function getTicker() {
 }
 function sendTicker(ticker: string) {
 	chrome.runtime.onConnect.addListener(port => {
-		port.postMessage({ ticker: ticker, url: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`, from: "background" })
+		port.postMessage({ ticker: ticker, url: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`, from: " sendTicker background" })
 	})
 }
 

@@ -9,6 +9,7 @@ const ScreenerSaver: React.FC = () => {
 
 	const [screeners, setScreeners] = useState<Screeners>({});
 	const [currTicker, setCurrTicker] = useState<string>("");
+	const [companyUrl, setCompanyUrl] = useState<string>("");
 	const [errorMsg, setErrorMsg] = useState("");
 	const [secUrl, setSecUrl] = useState("");
 	const [isFinvizPage, setIsFinvizPage] = useState(false);
@@ -20,15 +21,22 @@ const ScreenerSaver: React.FC = () => {
 			const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 			if (tab.url!.includes("quote.ashx")) {
 				setCurrTicker((extractTicker(tab.url!) ?? ""))
-				const port = chrome.runtime.connect({ name: "ticker" })
-				port.onMessage.addListener(msg => {
-					console.log({msg})
+				const compPort = chrome.runtime.connect({ name: "comp" })
+				compPort.onMessage.addListener(msg => {
+					// console.log(`Received from background CoMp`)
+					// console.log({msg})
 					setSecUrl(msg.url);
+					setCompanyUrl(msg.companyUrl)
 				})
 
-				return () => {
-					port.disconnect();
-				};
+				// for testing purpose
+				// const compPort = chrome.runtime.connect({ name: "comp" })
+				// compPort.onMessage.addListener(msg => {
+				// 	console.log(`Received from background oMCp`)
+				// 	console.log({msg})
+				// 	// setSecUrl(msg.url);
+				// 	setCompanyUrl(msg.companyUrl)
+				// })
 			} else {
 				setSecUrl("")
 				setCurrTicker("")
@@ -199,7 +207,9 @@ const ScreenerSaver: React.FC = () => {
 					<>
 						<hr className='my-2' />
 						<div className="p-2 m-3 border-b-2 border-emerald-600 rounded">
-							<a href={secUrl} target="_blank"> {currTicker.toUpperCase()} Quarter & Annual Fillings Fillings </a>
+							<span className="font-semi text-[1.0rem]">{currTicker}: </span>
+							<a href={secUrl} target="_blank">  Quarter & Annual Fillings </a>
+							 | <a href={companyUrl} target="_blank"> Homepage / IR</a>
 						</div>
 					</>
 				)}

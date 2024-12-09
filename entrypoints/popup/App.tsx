@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 // import "./App.css";
 import { Collection } from '../types';
 import ScreenerSaver from './ScreenSaver';
@@ -11,31 +11,6 @@ const App: React.FC = () => {
 	const [currTicker, setCurrTicker] = useState<string>("");
 	const [tabId, setTabId] = useState(-1);
 
-	useEffect(() => {
-		(async () => {
-			// const [tab] = await chrome.tabs.query({ currentWindow: true });
-			// console.log(tab.url!)
-			// if (tab.url && tab.url.includes("quote.ashx")) {
-
-				// setCurrTicker(extractTicker(tab.url)?? "");
-				/*** Comment out for no message passing  */
-				// const port = chrome.runtime.connect({ name: "ticker" })
-				// port.onMessage.addListener(msg => {
-				// 	setCurrTicker(msg.ticker)
-				// })
-				// if (tab.id) {
-				// 	console.log(tab.id)
-				// 	setTabId(tab.id)
-				// }
-				// return () => {
-				// 	port.disconnect();
-				// };
-				
-			// } else {
-			// 	setCurrTicker("")
-			// }
-		})();
-	}, [])
 
 	return (
 		// <div className="tabs">

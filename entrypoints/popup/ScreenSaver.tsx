@@ -115,7 +115,7 @@ const ScreenerSaver: React.FC = () => {
 
 	return (
 		<div>
-			<p id="errorMsg" className=" text-red-600" aria-label='error-message'> {errorMsg} </p>
+			<p id="errorMsg" className=" text-pink-500" aria-label='error-message'> {errorMsg} </p>
 			<section className="p-4 m-3 border-2 border-emerald-600 rounded">
 				<form
 					id="favoritesForm"

@@ -12,8 +12,8 @@ function SidePanel() {
 			chrome.runtime.onConnect.addListener(port => {
 				if (port.name === "textHighlight") {
 					port.onMessage.addListener(msg => {
-						console.log("Side Panel getting port msg")
-						console.log(msg.text)
+						// console.log("Side Panel getting port msg")
+						// console.log(msg.text)
 						setHighlightedText(msg.text);
 					})
 				}
@@ -63,16 +63,22 @@ function SidePanel() {
 	return (
 
 		<main>
-			<h1>{ticker.toUpperCase()}</h1>
-			<form onSubmit={(e) => saveNote(e)}>
-			<input type="hidden" value={highlightedText} name="highlightedText" />
-			<blockquote>
-				{highlightedText}
-			</blockquote>
-			<textarea name="note" value={note} onChange={(e) => handleTextarea(e)}>
-			</textarea>
-			<button>save</button>
-			<button type="reset" onClick={() => clearForm()}>clear</button>
+			<form onSubmit={(e) => saveNote(e)} className="m-3 flex flex-col gap-3">
+				<label htmlFor="highlightedText">Quote:</label>
+				<input type="hidden" aria-label="highlighted quotes" value={highlightedText} name="highlightedText" id="highlightedText" />
+				<blockquote className="min-h-32 border-2 border-emerald-600 rounded">
+					{highlightedText}
+				</blockquote>
+
+				<label htmlFor="note">Notes:</label>
+				<textarea className="min-h-32 border-2 border-emerald-600 rounded"
+					id="note"
+					aria-label="user's note" name="note" value={note} onChange={(e) => handleTextarea(e)}>
+				</textarea>
+				<div className="self-center">
+					<button>save</button>
+					<button type="reset" onClick={() => clearForm()}>clear</button>
+				</div>
 			</form>
 		</main>
 	)

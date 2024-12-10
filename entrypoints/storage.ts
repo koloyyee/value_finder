@@ -28,6 +28,11 @@ export class NotesStorageImp implements Storage {
 		this.collectionName = collectionName.trim() === "" ? Collection.notes : collectionName;
 	}
 
+	/**
+	 * 
+	 * @param key ticker or name of the note
+	 * @param link 
+	 */
 	save(key: string, link: { [key: string]: string; } | string): Promise<{ err: string; } | { err: null; }> {
 		throw new Error("Method not implemented.");
 	}

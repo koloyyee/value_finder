@@ -63,16 +63,23 @@ function SidePanel() {
 
 	return (
 
-		<main>
+		<main className="border-2 border-emerald-600 min-h-[90vh] m-1 rounded">
 			<form onSubmit={(e) => saveNote(e)} className="m-3 flex flex-col gap-3">
-				<label htmlFor="highlightedText">Quote:</label>
+				<label htmlFor="title">Note Title:</label>
+				<input name="title" type="text" className="rounded" required />
+				<label htmlFor="ticker">Ticker: <small>(optional)</small></label>
+				<input name="ticker" type="text" className="rounded"/>
+				<label htmlFor="highlightedText">Quote: <small>(highlighted text on the page)</small></label>
 				<input type="hidden" aria-label="highlighted quotes" value={highlightedText} name="highlightedText" id="highlightedText" />
-				<blockquote className="min-h-32 border-2 border-emerald-600 rounded">
+				<blockquote className="min-h-32 border-2 border-emerald-600 rounded max-h-60 overflow-y-auto">
 					{highlightedText}
 				</blockquote>
-
+				{currUrl !== "" ? (
+					<small className="truncate">from: {currUrl}</small>
+				): <></>}
 				<label htmlFor="note">Notes:</label>
-				<textarea className="min-h-32 border-2 border-emerald-600 rounded"
+				<textarea className="min-h-32 rounded"
+					required
 					id="note"
 					aria-label="user's note" name="note" value={note} onChange={(e) => handleTextarea(e)}>
 				</textarea>

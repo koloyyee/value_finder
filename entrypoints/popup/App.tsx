@@ -12,6 +12,12 @@ const App: React.FC = () => {
 	const [tabId, setTabId] = useState(-1);
 
 
+	function openSidePanel() {
+		
+		console.log("sending action")
+		chrome.runtime.sendMessage({ action: "open_side_panel"})
+		window.close()
+	}
 	return (
 		// <div className="tabs">
 		// 	<div className="tab-buttons">
@@ -31,6 +37,7 @@ const App: React.FC = () => {
 			<ScreenerSaver  />
 			<hr />
 			<SecBookmarks />
+			<button type="button" onClick={() => openSidePanel()}> Open Note </button>
 		</div>
 	);
 }

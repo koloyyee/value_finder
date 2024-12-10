@@ -3,34 +3,46 @@ import { Collection } from "./types";
 export default defineBackground(() => {
 
 	retransmit();
-
-
+	(async () => openSidePanel())();
 	chrome.runtime.onInstalled.addListener(() => {
 		contextMenuOpenPanel();
 	})
 
 });
 
+async function openSidePanel() {
+	const [tab] = await chrome.tabs.query({ active: true });
+
+	if (tab) {
+		chrome.runtime.onMessage.addListener(msg => {
+			console.log(msg)
+			if (msg.action === "open_side_panel") {
+				chrome.sidePanel.open({ windowId: tab.windowId })
+			}
+		})
+	}
+}
+
 function retransmit() {
 	chrome.runtime.onConnect.addListener((port) => {
-			port.onMessage.addListener(msg => {
-				// console.log(`TICKER: Received from content on port: ${port.name}`)
-				// console.log({ msg })
-				if (msg.ticker) {
-					chrome.runtime.onConnect.addListener(port => {
-						// acting as a hub for passing messages to different port with the chrome.runtime
-						if (port.name === "comp") {
-							// console.log(`handled by background from port: ${port.name}`)
-							port.postMessage({ ticker: String(msg.ticker), url: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`, from: "ticker port - background", companyUrl: msg.companyUrl })
-						}
-						// if ( port.name === "comp") {
-						// 	console.log(`handled by background from port: ${port.name}`)
-						// 	port.postMessage({  from: "comp port - background", companyUrl: msg.companyUrl })
-						// }
+		port.onMessage.addListener(msg => {
+			// console.log(`TICKER: Received from content on port: ${port.name}`)
+			// console.log({ msg })
+			if (msg.ticker) {
+				chrome.runtime.onConnect.addListener(port => {
+					// acting as a hub for passing messages to different port with the chrome.runtime
+					if (port.name === "comp") {
+						// console.log(`handled by background from port: ${port.name}`)
+						port.postMessage({ ticker: String(msg.ticker), url: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`, from: "ticker port - background", companyUrl: msg.companyUrl })
+					}
+					// if ( port.name === "comp") {
+					// 	console.log(`handled by background from port: ${port.name}`)
+					// 	port.postMessage({  from: "comp port - background", companyUrl: msg.companyUrl })
+					// }
 
-					})
-				}
-			});
+				})
+			}
+		});
 	});
 	(async () => {
 		screenersCollectionChecker();

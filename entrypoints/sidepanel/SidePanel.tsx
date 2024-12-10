@@ -13,8 +13,10 @@ function SidePanel() {
 				if (port.name === "textHighlight") {
 					port.onMessage.addListener(msg => {
 						// console.log("Side Panel getting port msg")
-						// console.log(msg.text)
+						console.log(msg)
+
 						setHighlightedText(msg.text);
+						setCurrUrl(msg.url);
 					})
 				}
 			})
@@ -22,23 +24,23 @@ function SidePanel() {
 		getHighlighted();
 	}, [])
 
-	useEffect(() => {
-		(async () => {
-			const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-			if (!tab || !tab.url) {
-				console.error("tab has something wrong")
-				return
-			}
-			setCurrUrl(tab.url);
+	// useEffect(() => {
+	// 	(async () => {
+	// 		const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+	// 		if (!tab || !tab.url) {
+	// 			console.error("tab has something wrong")
+	// 			return
+	// 		}
+	// 		setCurrUrl(tab.url);
 
-			const port = chrome.runtime.connect({ name: "ticker " })
-			port.onMessage.addListener(msg => {
-				setTicker(msg.ticker)
-			})
+	// 		const port = chrome.runtime.connect({ name: "comp" })
+	// 		port.onMessage.addListener(msg => {
+	// 			setTicker(msg.ticker)
+	// 		})
 
-		})()
+	// 	})()
 
-	}, [])
+	// }, [])
 
 	function handleTextarea(e: ChangeEvent<HTMLTextAreaElement>): void {
 		const text = e.currentTarget.value;
@@ -55,7 +57,6 @@ function SidePanel() {
 		const formData = new FormData(form);
 		const highlightedText = String(formData.get("highlightedText"))
 		const note = String(formData.get("note"))
-
 		console.log({ highlightedText, note, currUrl, ticker })
 
 	}

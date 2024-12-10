@@ -4,8 +4,10 @@ export default defineUnlistedScript(() => {});
 export const Collection = {
   screeners: "screeners" as const,
   bookmarks: "bookmarks" as const,
+  notes: "notes" as const,
   mockScreeners: "mock_screeners" as const,
   mockBookmarks: "mock_bookmarks" as const,
+  mockNotes: "mock_notes" as const,
 } as const;
 
 /**

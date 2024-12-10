@@ -40,7 +40,7 @@ function getSelection() {
 	let capturedText = document.getSelection()?.toString();
 	if (capturedText?.trim() !== "") {
 		const port = chrome.runtime.connect({ name: "textHighlight" })
-		port.postMessage({ text: capturedText, from: "content" })
+		port.postMessage({ text: capturedText, from: "content", url: window.location.href })
 	}
 }
 

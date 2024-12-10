@@ -18,6 +18,34 @@ interface Storage {
 	clear(): Promise<void>;
 }
 
+export class NotesStorageImp implements Storage {
+
+	private storage: chrome.storage.StorageArea
+	private collectionName: string;
+
+	constructor( storage: chrome.storage.StorageArea, collectionName: "") {
+		this.storage = storage;
+		this.collectionName = collectionName.trim() === "" ? Collection.notes : collectionName;
+	}
+
+	save(key: string, link: { [key: string]: string; } | string): Promise<{ err: string; } | { err: null; }> {
+		throw new Error("Method not implemented.");
+	}
+	get(params: {
+		key?: string;
+		value?: { [ticker: string]: string; } | string;
+	}): Promise<Screeners | Bookmarks | undefined> {
+		throw new Error("Method not implemented.");
+	}
+	del(key: string): Promise<{ err: null | string; }> {
+		throw new Error("Method not implemented.");
+	}
+	clear(): Promise<void> {
+		throw new Error("Method not implemented.");
+	}
+
+}
+
 export class BookmarksStorageImp implements Storage {
 	private collectionName: string;
 	private storage: chrome.storage.StorageArea;

@@ -5,6 +5,8 @@ export default defineConfig({
   extensionApi: 'chrome',
   modules: ['@wxt-dev/module-react'],
 	manifest : {
+		name:"Value Finder",
+		description: "saving screeners, jotting notes, and bookmarking links for value investors",
 		permissions : [
 			"storage",
 			"activeTab",

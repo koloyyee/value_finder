@@ -22,20 +22,37 @@ export const Collection = {
  * 	]
  * }
  */
-export interface Bookmarks {
+export type Bookmarks = {
   [ticker: string]: BookmarkKV;
 }
 
-export interface BookmarkKV {
+export type BookmarkKV = {
   [bookmarkName: string]: string;
 }
 
 /**
- * watchlists : [
+ * screeners : [
  * 	uniqueScreenerName: uniqueScreenerUrl,
  * 	uniqueScreenerName2: uniqueScreenerUrl2,
  * ]
  */
-export interface Screeners {
+export type Screeners = {
   [screener: string]: string;
+}
+
+
+/**
+ * notes : [
+ * 	{ 
+ * 			title: title,
+ * 			source: sourceUrl,
+ * 			ticker: ticker (optional),
+ * 			quote: highlightedText,
+ * 			note: notesUserTyped		
+ * 		}
+ * 	}
+ * ]
+ */
+export interface Notes {
+	[key:string ] : string 
 }

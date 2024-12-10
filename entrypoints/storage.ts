@@ -1,4 +1,4 @@
-import { BookmarkKV, Bookmarks, Collection, Screeners } from "./types";
+import { BookmarkKV, Bookmarks, Collection, Notes, Screeners } from "./types";
 
 export default defineUnlistedScript(() => { });
 
@@ -8,13 +8,13 @@ export const BASE = "https://finviz.com/screener.ashx";
 interface Storage {
 	save(
 		key: string,
-		link: { [key: string]: string } | string,
+		link: { [key: string]: string } | string | Notes | Screeners | Bookmarks,
 	): Promise<{ err: string } | { err: null }>;
 	get(params: {
 		key?: string;
 		value?: { [ticker: string]: string } | string;
-	}): Promise<Screeners | Bookmarks | undefined>;
-	del(key: string): Promise<{ err: null | string }>;
+	}): Promise<Screeners | Bookmarks | undefined | Notes[]>;
+	del(key: string | Notes): Promise<{ err: null | string }>;
 	clear(): Promise<void>;
 }
 
@@ -23,7 +23,7 @@ export class NotesStorageImp implements Storage {
 	private storage: chrome.storage.StorageArea
 	private collectionName: string;
 
-	constructor( storage: chrome.storage.StorageArea, collectionName: "") {
+	constructor(storage: chrome.storage.StorageArea, collectionName = "") {
 		this.storage = storage;
 		this.collectionName = collectionName.trim() === "" ? Collection.notes : collectionName;
 	}
@@ -33,17 +33,84 @@ export class NotesStorageImp implements Storage {
 	 * @param key ticker or name of the note
 	 * @param link 
 	 */
-	save(key: string, link: { [key: string]: string; } | string): Promise<{ err: string; } | { err: null; }> {
-		throw new Error("Method not implemented.");
+	async save(title: string, newNote: Notes): Promise<{ err: string; } | { err: null; }> {
+		// allow duplicate
+		const collection = await this.storage.get(this.collectionName);
+		const notes = collection[this.collectionName] || []
+		notes.push(newNote)
+		const notesColl = {
+			[this.collectionName]: notes
+		}
+		await this.storage.set(notesColl)
+
+		return { err: null }
 	}
-	get(params: {
-		key?: string;
-		value?: { [ticker: string]: string; } | string;
-	}): Promise<Screeners | Bookmarks | undefined> {
-		throw new Error("Method not implemented.");
+
+	/**
+	 * A general way to query  
+	 * @param param0 
+	 * @returns 
+	 */
+	async get({ key = "", value = "" }: {
+		key?: string; value?: { [ticker: string]: string; } | string;
+	} = {}): Promise<Notes[] | undefined> {
+
+		const collection = await this.storage.get(this.collectionName);
+		let notes: [Notes] = collection[this.collectionName] || [];
+
+		// a note 
+		if (value instanceof Object) {
+			const index = notes.findIndex(n =>
+				Object.keys(n).every(k => n[k] === value[k])
+			)
+			return [notes[index]]
+
+		} else {
+
+			if (key.trim() !== "" && value.trim() !== "") {
+				return notes.filter(note => Object.keys(note).find(() => note[key] === value))
+			}
+			if (key.trim() === "" && value.trim() !== "") {
+				return notes.filter(note => Object.keys(note).find((noteKey) => note[noteKey] === value))
+			}
+			if (key.trim() !== "" && value.trim() === "") {
+				return notes;
+			}
+		}
+
+		return undefined;
 	}
-	del(key: string): Promise<{ err: null | string; }> {
-		throw new Error("Method not implemented.");
+
+	async update(id: string, newNote: Notes): Promise<{ err: null | string; }> {
+		const collection = await this.storage.get(this.collectionName);
+		const notes : [Notes] = collection[this.collectionName]
+
+		const index = notes.findIndex((n) => n.id === id)
+		if( index === -1) {
+			return {err: `id: ${id} doesn't exist.`}
+		}
+		notes[index] = newNote;
+
+		await this.storage.set({
+			[this.collectionName] : notes
+		})
+		
+		return { err: null }
+	}
+	async del(note: Notes): Promise<{ err: null | string; }> {
+		const collection = await this.storage.get(this.collectionName)
+		const notes = collection[this.collectionName] || []
+		const targetIndex = notes.findIndex((n: Notes) => {
+			return Object.keys(n).every(key => note[key] === n[key])
+		})
+		if (targetIndex === - 1) {
+			return { err: "no such note." }
+		}
+		notes.splice(targetIndex, 1);
+		await this.storage.set({
+			[this.collectionName]: notes
+		})
+		return { err: null }
 	}
 	clear(): Promise<void> {
 		throw new Error("Method not implemented.");
@@ -57,10 +124,10 @@ export class BookmarksStorageImp implements Storage {
 
 	constructor(
 		storage: chrome.storage.StorageArea,
-		collectionName = "" 
+		collectionName = ""
 	) {
 		this.storage = storage;
-		this.collectionName = collectionName.trim() === "" ?	this.collectionName = Collection.bookmarks: collectionName
+		this.collectionName = collectionName.trim() === "" ? this.collectionName = Collection.bookmarks : collectionName
 	}
 
 	async save(
@@ -69,12 +136,6 @@ export class BookmarksStorageImp implements Storage {
 	): Promise<{ err: string } | { err: null }> {
 		const byTicker = await this.get({ key: key });
 		const byLink = await this.get({ bookmarkKV: bookmarkKV });
-		console.log(byTicker, byLink);
-		console.log(byLink === undefined);
-
-		// if (byTicker !== undefined ) {
-		// 	return { err: "Something is wrong with the Ticker." }
-		// }
 
 		if (byLink !== undefined && Object.keys(byLink).length !== 0) {
 			return { err: "Bookmark Link existed already." };
@@ -199,7 +260,7 @@ export class ScreenerStorage implements Storage {
 		collectionName = "",
 	) {
 		this.storage = storage;
-		this.collectionName = collectionName.trim() === "" ?	this.collectionName = Collection.screeners : collectionName
+		this.collectionName = collectionName.trim() === "" ? this.collectionName = Collection.screeners : collectionName
 	}
 
 	/**

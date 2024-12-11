@@ -8,6 +8,7 @@ function SidePanel() {
 	const [ticker, setTicker] = useState("")
 	const [highlightedText, setHighlightedText] = useState("");
 	const [note, setNote] = useState("")
+	const [highlightedTextId, setHighlightedTextId] = useState("");
 
 	useEffect(() => {
 		function getHighlighted() {
@@ -19,6 +20,7 @@ function SidePanel() {
 
 						setHighlightedText(msg.text);
 						setCurrUrl(msg.url);
+						setHighlightedTextId(msg.id);
 					})
 				}
 			})
@@ -26,42 +28,27 @@ function SidePanel() {
 		getHighlighted();
 	}, [])
 
-	// useEffect(() => {
-	// 	(async () => {
-	// 		const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-	// 		if (!tab || !tab.url) {
-	// 			console.error("tab has something wrong")
-	// 			return
-	// 		}
-	// 		setCurrUrl(tab.url);
-
-	// 		const port = chrome.runtime.connect({ name: "comp" })
-	// 		port.onMessage.addListener(msg => {
-	// 			setTicker(msg.ticker)
-	// 		})
-
-	// 	})()
-
-	// }, [])
-
 	function handleTextarea(e: ChangeEvent<HTMLTextAreaElement>): void {
 		const text = e.currentTarget.value;
 		setNote(text)
 	}
 
 	function clearForm(): void {
-		setHighlightedText("")
+		setCurrUrl("")
 		setNote("")
+		setHighlightedText("")
+		setHighlightedTextId("")
 	}
+
 	async function saveNote(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		const form = e.currentTarget;
 		const formData = new FormData(form);
-		const id = String(Date.now());
 		const highlightedText = String(formData.get("highlightedText"))
 		const title = String(formData.get("title"))
 		const note = String(formData.get("note"))
 		const ticker = formData.get("ticker") !== null ? String(formData.get("ticker")) : ""
+		const id = String(Date.now())
 
 		const newNote: Notes = {
 			id: id,
@@ -77,9 +64,7 @@ function SidePanel() {
 		}
 
 		form.reset();
-		setCurrUrl("")
-		setNote("")
-		setHighlightedText("")
+		clearForm();
 		// render the notes list at the back.
 	}
 
@@ -96,6 +81,7 @@ function SidePanel() {
 				<blockquote className="min-h-32 border-2 border-emerald-600 rounded max-h-60 overflow-y-auto">
 					{highlightedText}
 				</blockquote>
+				<small> Remove Highlight: de-select text, right-click the highlighted text</small>
 				{currUrl !== "" ? (
 					<small className="truncate">source: {currUrl}</small>
 				) : <></>}

@@ -42,29 +42,41 @@ function removeSpecificHighlight() {
 	const selection = window.getSelection();
 
 	if (selection && selection.rangeCount > 0) {
-			const range = selection.getRangeAt(0);
-			let container = range.commonAncestorContainer;
+		const range = selection.getRangeAt(0);
+		let container = range.commonAncestorContainer;
 
-			// If the container is a text node, get its parent element
-			if (container.nodeType === Node.TEXT_NODE) {
-					container = container.parentNode!;
+		// If the container is a text node, get its parent element
+		if (container.nodeType === Node.TEXT_NODE) {
+			container = container.parentNode!;
+		}
+
+		// Ensure we are working with an element and find the nearest <span.highlight>
+		if (container.nodeType === Node.ELEMENT_NODE && container.classList.contains('highlight')) {
+			const parent = container.parentNode;
+
+			// Replace the span with its child content
+			while (container.firstChild) {
+				parent!.insertBefore(container.firstChild, container);
 			}
 
-			// Ensure we are working with an element and find the nearest <span.highlight>
-			if (container.nodeType === Node.ELEMENT_NODE && container.classList.contains('highlight')) {
-					const parent = container.parentNode;
-
-					// Replace the span with its child content
-					while (container.firstChild) {
-							parent!.insertBefore(container.firstChild, container);
-					}
-
-					parent!.removeChild(container); // Remove the empty span
-				chrome.runtime.connect({ name : "mouse-action"})
-				const port = chrome.runtime.connect({ name: "textHighlight" })
-				port.postMessage({ text: "", from: "content", url: "", })
-			}
+			parent!.removeChild(container); // Remove the empty span
+			chrome.runtime.connect({ name: "mouse-action" })
+			const port = chrome.runtime.connect({ name: "textHighlight" })
+			port.postMessage({ text: "", from: "content", url: "", })
+		}
 	}
+}
+
+function highlightText(selection: Selection) {
+	const range = selection.getRangeAt(0);
+	const span = document.createElement('span');
+	span.style.backgroundColor = 'yellow'; // Change color as needed
+	span.classList.add("highlight")
+
+	// Wrap the selected text with the span
+	const selectedText = range.extractContents();
+	span.appendChild(selectedText);
+	range.insertNode(span);
 }
 
 /**
@@ -75,19 +87,11 @@ function getSelection() {
 	const selection = window.getSelection();
 
 	if (selection) {
-		const highlightMarking = String(Date.now()) ;
+		const highlightMarking = String(Date.now());
 
 		if (selection.rangeCount > 0) {
-			const range = selection.getRangeAt(0);
-			const span = document.createElement('span');
-			span.style.backgroundColor = 'yellow'; // Change color as needed
-			span.classList.add("highlight")
-
-			// Wrap the selected text with the span
-			const selectedText = range.extractContents();
-			span.appendChild(selectedText);
-			range.insertNode(span);
-
+			// opt-out because it is not persistent yet.
+			// highlightText(selection)
 
 			let capturedText = document.getSelection()?.toString();
 

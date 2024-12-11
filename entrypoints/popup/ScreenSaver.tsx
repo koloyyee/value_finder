@@ -1,11 +1,11 @@
-import { BASE, ScreenerStorage } from "../storage";
+import { BASE, ScreenerStorageImpl } from "../storage";
 import { Screeners } from "../types";
 import { extractTicker } from "./utils";
 
 
 
 const ScreenerSaver: React.FC = () => {
-	const screenerStorage = new ScreenerStorage(chrome.storage.local);
+	const screenerStorage = new ScreenerStorageImpl(chrome.storage.local);
 
 	const [screeners, setScreeners] = useState<Screeners>({});
 	const [currTicker, setCurrTicker] = useState<string>("");

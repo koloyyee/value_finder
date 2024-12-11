@@ -251,7 +251,7 @@ export class BookmarksStorageImp implements Storage {
 	}
 }
 
-export class ScreenerStorage implements Storage {
+export class ScreenerStorageImpl implements Storage {
 	private collectionName: string;
 	private storage: chrome.storage.StorageArea;
 

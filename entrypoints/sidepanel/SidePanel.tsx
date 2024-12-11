@@ -1,4 +1,6 @@
 import { ChangeEvent } from "react";
+import Drawer from 'react-modern-drawer';
+import 'react-modern-drawer/dist/index.css';
 import { NotesStorageImp } from "../storage";
 import { Notes } from "../types";
 
@@ -67,7 +69,10 @@ function SidePanel() {
 		clearForm();
 		// render the notes list at the back.
 	}
-
+	const [isOpen, setIsOpen] = useState(false)
+	const toggleDrawer = () => {
+			setIsOpen((prevState) => !prevState)
+	}
 	return (
 
 		<main className="border-2 border-emerald-600 min-h-[90vh] m-1 rounded">
@@ -81,7 +86,7 @@ function SidePanel() {
 				<blockquote className="min-h-32 border-2 border-emerald-600 rounded max-h-60 overflow-y-auto">
 					{highlightedText}
 				</blockquote>
-				<small> Remove Highlight: de-select text, right-click the highlighted text</small>
+				{/* <small> Remove Highlight: de-select text, right-click the highlighted text</small> */}
 				{currUrl !== "" ? (
 					<small className="truncate">source: {currUrl}</small>
 				) : <></>}
@@ -95,8 +100,21 @@ function SidePanel() {
 					<button>save</button>
 					<button type="reset" onClick={() => clearForm()}>clear</button>
 				</div>
+				<button type="button" onClick={toggleDrawer}>Show</button>
+            <Drawer
+                open={isOpen}
+                onClose={toggleDrawer}
+                direction='bottom'
+                className='bla bla bla'
+								size={"95vh"}
+            >
+							<button type="button" onClick={toggleDrawer}>x</button>
+                <div>Hello World</div>
+            </Drawer>
 			</form>
+
 			{/* hidden list of notes on the bottom or on the side */}
+			
 		</main>
 	)
 }

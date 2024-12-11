@@ -1,23 +1,22 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { ScreenerStorage } from "../storage";
+import { ScreenerStorageImpl } from "../storage";
 import { Collection } from "../types";
 
 
 
-const mockScreener = new ScreenerStorage(chrome.storage.local, Collection.mockScreeners)
+const mock = new ScreenerStorageImpl(chrome.storage.local, Collection.mockScreeners)
 
-describe("chrome storage testing", () => {
-
+describe("Screener storage testing", () => {
 
 	beforeAll(async () => {
-		await mockScreener.save("test", "www.google.com");
+		await mock.save("test", "www.google.com");
 	})
 
 	afterAll(() => {
-		mockScreener.clear()
+		mock.clear()
 	})
 	test("should return obj by key", async () => {
-		const result = await mockScreener.get({ key: "test" });
+		const result = await mock.get({ key: "test" });
 		if (result) {
 			expect(result!["test"]).toContain("www.google.com");
 		} else {
@@ -25,7 +24,7 @@ describe("chrome storage testing", () => {
 		}
 	})
 	test("should return object by url", async () => {
-		const result = await mockScreener.get({ url: "www.google.com" })
+		const result = await mock.get({ url: "www.google.com" })
 
 		if (result) {
 			const key = Object.keys(result)[0];

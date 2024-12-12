@@ -1,5 +1,5 @@
 {
-  "name": "wxt-react-starter",
+  "name": "value-finder-chrome-extension",
   "description": "manifest.json description",
   "private": true,
   "version": "0.0.0",
@@ -9,6 +9,8 @@
     "dev:firefox": "wxt -b firefox",
     "build": "wxt build",
     "build:firefox": "wxt build -b firefox",
+		"submit:init": "wxt submit init",
+		"submit:dry":"wxt submit --dry-run --chrome-zip .output/value-finder-0.1-chrome.zip",
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",

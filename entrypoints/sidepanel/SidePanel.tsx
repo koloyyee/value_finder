@@ -80,9 +80,17 @@ function SidePanel() {
 			quote: highlightedText,
 			note: note
 		}
-		const { err } = await noteStorage.save(title, newNote);
-		if (err) {
-			console.error(err)
+		const intent = String(formData.get("intent"));
+		switch (intent) {
+			case Intent.create: {
+				const { err } = await noteStorage.save(title, newNote);
+				if (err) {
+					console.error(err)
+				}
+			}
+			case Intent.update: {
+				const {err} = await noteStorage.update(id, newNote);
+			}
 		}
 
 		form.reset();
@@ -116,7 +124,7 @@ function SidePanel() {
 	function downloadNote(note: Notes) {
 		// download from
 		window.prompt()
-	}	
+	}
 	return (
 
 		<main className="border-2 border-emerald-600 min-h-[90vh] m-1 rounded">

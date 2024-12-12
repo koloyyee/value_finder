@@ -11,8 +11,9 @@ const ScreenerSaver: React.FC = () => {
 	const [currTicker, setCurrTicker] = useState<string>("");
 	const [companyUrl, setCompanyUrl] = useState<string>("");
 	const [errorMsg, setErrorMsg] = useState("");
-	const [secUrl, setSecUrl] = useState("");
+	const [secReportUrl, setSecReportUrl] = useState("");
 	const [isFinvizPage, setIsFinvizPage] = useState(false);
+	const [insiderFiling, setInsiderFiling] = useState("")
 
 
 
@@ -25,8 +26,9 @@ const ScreenerSaver: React.FC = () => {
 				compPort.onMessage.addListener(msg => {
 					// console.log(`Received from background CoMp`)
 					// console.log({msg})
-					setSecUrl(msg.url);
+					setSecReportUrl(msg.secReport);
 					setCompanyUrl(msg.companyUrl)
+					setInsiderFiling(msg.insider)
 				})
 
 				// for testing purpose
@@ -38,11 +40,11 @@ const ScreenerSaver: React.FC = () => {
 				// 	setCompanyUrl(msg.companyUrl)
 				// })
 			} else {
-				setSecUrl("")
+				setSecReportUrl("")
 				setCurrTicker("")
 			}
 		})();
-	}, [secUrl])
+	}, [secReportUrl])
 
 
 
@@ -134,7 +136,7 @@ const ScreenerSaver: React.FC = () => {
 				</form>
 
 				<h3 className="text-lg font-bold" >Screeners </h3>
-				<div className="mt-4 h-48 overflow-y-auto">
+				<div className="mt-4 min-h-12 overflow-y-auto">
 
 					{Object.keys(screeners).length > 0 ? (
 						<>
@@ -171,7 +173,7 @@ const ScreenerSaver: React.FC = () => {
 					)}
 				</div>
 
-				{Object.keys(screeners).length > 0 && (
+				{/* {Object.keys(screeners).length > 0 && (
 					<button
 						id="clear_list"
 						onClick={clearList}
@@ -179,10 +181,10 @@ const ScreenerSaver: React.FC = () => {
 					>
 						Clear List
 					</button>
-				)}
+				)} */}
 
 			</section>
-			<section className="m-3 p-4 border-2 border-emerald-600 rounded">
+			<section className="m-3 p-2 border-2 border-emerald-600 rounded">
 
 				<div className="flex items-center gap-3">
 					<h3 className="text-md font-bold">Comp. Fundamentals</h3>
@@ -195,7 +197,7 @@ const ScreenerSaver: React.FC = () => {
 							type="text"
 							name="ticker"
 							placeholder="Enter Ticker"
-							className="py-2 rounded"
+							className=" rounded"
 							required
 						/>
 						<button type="submit">Search by Ticker</button>
@@ -206,10 +208,13 @@ const ScreenerSaver: React.FC = () => {
 				{currTicker && (
 					<>
 						<hr className='my-2' />
-						<div className="p-2 m-3 border-b-2 border-emerald-600 rounded">
+						<div className="p-1 m-3 border-b-2 border-emerald-600 rounded">
 							<span className="font-semi text-[1.0rem]">{currTicker}: </span>
-							<a href={secUrl} target="_blank">  Quarter & Annual Fillings </a>
-							 | <a href={companyUrl} target="_blank"> Homepage / IR</a>
+							<a href={secReportUrl} target="_blank">  Quarter & Annual (10Q&10K) </a>
+							 <span className="text-pink-700">|</span> 
+							 <a href={insiderFiling} target="_blank"> Insider(144) </a>
+							 <span className="text-pink-700">|</span> 
+							 <a href={companyUrl} target="_blank"> Homepage / IR</a>
 						</div>
 					</>
 				)}

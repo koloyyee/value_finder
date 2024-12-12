@@ -62,9 +62,15 @@ const SecBookmarks: React.FC = () => {
 			setErrorMsg(err);
 			return;
 		}
-			renderList();
+		renderList();
 	}
 
+	function openSidePanel() {
+
+		console.log("sending action")
+		chrome.runtime.sendMessage({ action: "open_side_panel" })
+		window.close()
+	}
 	return (
 		<div className="m-2 p-3 border-2 border-emerald-600 rounded ">
 			{/* <button type="button" onClick={() => window.prompt()}>open</button> */}
@@ -72,7 +78,9 @@ const SecBookmarks: React.FC = () => {
 			<form onSubmit={saveBookmark} className="flex gap-3">
 				<input name="ticker" placeholder="Ticker" className="py-2 rounded w-1/5" required />
 				<input name="bookmarkName" placeholder="Bookmark name e.g.: 2023-10q" className="py-2 rounded" required />
-				<button> bookmark </button>
+				<button type="submit"> bookmark </button>
+				<button type="button" onClick={() => openSidePanel()}> Open Note </button>
+
 			</form>
 			{bookmarks.size > 0 ?
 				<ul className="h-36 overflow-y-auto grid grid-cols-2">
@@ -83,7 +91,7 @@ const SecBookmarks: React.FC = () => {
 								{bookmarkList.map((bookmark, i) => (
 									<li key={i}>
 										{Object.keys(bookmark).map((name, i) => (
-											<form onSubmit={(e) => removeBookmark(e)} key={name + i}>
+											<form className="flex" onSubmit={(e) => removeBookmark(e)} key={name + i}>
 												<a href={bookmark[name]} key={i} target="_blank"> {name} </a>
 												<input name="url" type="hidden" value={bookmark[name]} />
 												<input name="ticker" type="hidden" value={ticker} />

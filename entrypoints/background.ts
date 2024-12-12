@@ -33,7 +33,7 @@ function retransmit() {
 					// acting as a hub for passing messages to different port with the chrome.runtime
 					if (port.name === "comp") {
 						// console.log(`handled by background from port: ${port.name}`)
-						port.postMessage({ ticker: String(msg.ticker), url: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`, from: "ticker port - background", companyUrl: msg.companyUrl })
+						port.postMessage({ ticker: String(msg.ticker), secReport: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`, from: "ticker port - background", companyUrl: msg.companyUrl, insider: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=144` })
 					}
 					// if ( port.name === "comp") {
 					// 	console.log(`handled by background from port: ${port.name}`)
@@ -123,7 +123,7 @@ async function contextMenuOpenPanel() {
 	})
 
 	const port = chrome.runtime.connect({ name: "textHighlight" });
-	port.onMessage.addListener( msg => {
+	port.onMessage.addListener(msg => {
 		console.log("received from background in content.ts")
 		console.log(msg)
 	})

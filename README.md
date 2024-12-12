@@ -7,18 +7,18 @@ especially with a their great stock screener,
 however, you can't save it...
 therefore I made this Chrome Extension to save the screener.
 
-Company summary(AI):
+<!-- Company summary(AI):
 
 When looking for value company the qualitative is as important as quantitative analysis,
 through understanding the business, we, investors will know if the company is within our circle of competence.
 
 Business Summary (AI):
 
-Highlight text, right-click and summarize
+Highlight text, right-click and summarize -->
 
 Note taking:
 
-Save some short notes
+Save notes with source, quotes, ticker(optional), title, and note.
 
 ## Suggestions?
 

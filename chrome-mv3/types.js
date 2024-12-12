@@ -1,2 +1,0 @@
-var types=function(){"use strict";function r(n){return n==null||typeof n=="function"?{main:n}:n}const e=r(()=>{});function i(){}function t(n,...c){}const o={debug:(...n)=>t(console.debug,...n),log:(...n)=>t(console.log,...n),warn:(...n)=>t(console.warn,...n),error:(...n)=>t(console.error,...n)};return(async()=>{try{return await e.main()}catch(n){throw o.error('The unlisted script "types" crashed on startup!',n),n}})()}();
-types;

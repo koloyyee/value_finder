@@ -1,2 +1,0 @@
-var storage=function(){"use strict";var o,t;function e(r){return r==null||typeof r=="function"?{main:r}:r}((t=(o=globalThis.browser)==null?void 0:o.runtime)==null?void 0:t.id)==null?globalThis.chrome:globalThis.browser;const i=e(()=>{});function l(){}function n(r,...c){}const s={debug:(...r)=>n(console.debug,...r),log:(...r)=>n(console.log,...r),warn:(...r)=>n(console.warn,...r),error:(...r)=>n(console.error,...r)};return(async()=>{try{return await i.main()}catch(r){throw s.error('The unlisted script "storage" crashed on startup!',r),r}})()}();
-storage;

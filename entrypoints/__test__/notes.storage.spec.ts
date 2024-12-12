@@ -1,37 +1,53 @@
-// import { afterAll, beforeAll, describe, expect, test } from "vitest";
-// import { NotesStorageImp } from "../storage";
-// import { Collection } from "../types";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { NotesStorageImp } from "../storage";
+import { Collection, Notes } from "../types";
 
 
 
-// 	const mock = new NotesStorageImp(chrome.storage.local, Collection.mockNotes)
+	const mock = new NotesStorageImp(chrome.storage.local, Collection.mockNotes)
 
-// describe("Screener storage testing", () => {
+describe("Notes storage testing", () => {
 
-// 	beforeAll(async () => {
-// 		await mock.save("test", { url: "www.google.com" });
-// 	})
+	beforeAll(async () => {
+		const testNote :Notes = {
+			ticker: "pltr",
+			source: "test.com",
+			quote: "amazing quote",
+			note: "can you tell this is a test?"
+		}
+		await mock.save("test", testNote);
+	})
 
-// 	afterAll(() => {
-// 		mock.clear()
-// 	})
-// 	test("should return obj by key", async () => {
-// 		const result = await mock.get({ key: "test" });
-// 		if (result) {
-// 			expect(result["test"]).toContain("www.google.com");
-// 		} else {
-// 			console.error("Something bad happened")
-// 		}
-// 	})
-// 	test("should return object by url", async () => {
-// 		const result = await mock.get({ value: { url: "www.google.com" } })
+	test("should get all", async () => {
+		const result = await mock.get();
+		// console.log(result)
 
-// 		if (result) {
-// 			const key = Object.keys(result)[0] as string;
-// 			expect(result[key]).toBe("www.google.com");
-// 			expect(key).toBe("test");
-// 		} else {
-// 			console.error("Something bad happened")
-// 		}
-// 	})
-// })
+	})
+
+
+	afterAll(() => {
+		mock.clear()
+	})
+	test("should return obj by key", async () => {
+		let results = await mock.get({key: "pltr"});
+		if (results) {
+			let result = results[0]
+			expect(result['source']).toBe("test.com")
+			expect(result['note']).toBe("can you tell this is a test?")
+
+		} else {
+			console.error("Something bad happened");
+		}
+	})
+	test("should return object by url", async () => {
+		const results = await mock.get({ value: { source: "test.com" } })
+		if (results) {
+			let result = results[0]
+		console.log(result)
+			expect(result['ticker']).toBe("pltr")
+
+		} else {
+			console.error("Something bad happened")
+		}
+	})
+})

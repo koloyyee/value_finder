@@ -2,15 +2,24 @@ import { ChangeEvent } from "react";
 import Drawer from 'react-modern-drawer';
 import 'react-modern-drawer/dist/index.css';
 import { NotesStorageImp } from "../storage";
-import { Notes } from "../types";
+import { Intent, Notes } from "../types";
 
 function SidePanel() {
 	const noteStorage = new NotesStorageImp(chrome.storage.local);
+	const [intent, setIntent] = useState<string>(Intent.create)
+
+
+	// Note data send from message passing port.
 	const [currUrl, setCurrUrl] = useState("")
-	const [ticker, setTicker] = useState("")
 	const [highlightedText, setHighlightedText] = useState("");
+
+	// Note data either from old note or start with empty string. 
+	const [noteTicker, setNoteTicker] = useState("")
 	const [note, setNote] = useState("")
-	const [highlightedTextId, setHighlightedTextId] = useState("");
+	const [noteId, setNoteId] = useState("");
+	const [noteTitle, setNoteTitle] = useState("");
+
+	const [savedNotes, setSavedNotes] = useState<Notes[] | undefined>([]);
 
 	useEffect(() => {
 		function getHighlighted() {
@@ -22,13 +31,21 @@ function SidePanel() {
 
 						setHighlightedText(msg.text);
 						setCurrUrl(msg.url);
-						setHighlightedTextId(msg.id);
+						setNoteId(msg.id);
 					})
 				}
 			})
+			renderList();
+			console.log(savedNotes)
 		}
 		getHighlighted();
 	}, [])
+
+	async function renderList() {
+		const list = await noteStorage.get();
+		setSavedNotes(list)
+
+	}
 
 	function handleTextarea(e: ChangeEvent<HTMLTextAreaElement>): void {
 		const text = e.currentTarget.value;
@@ -39,7 +56,10 @@ function SidePanel() {
 		setCurrUrl("")
 		setNote("")
 		setHighlightedText("")
-		setHighlightedTextId("")
+		setNoteId("")
+		setNoteTicker("")
+		setNoteTitle("")
+		setIntent(Intent.create);
 	}
 
 	async function saveNote(e: React.FormEvent<HTMLFormElement>) {
@@ -50,7 +70,7 @@ function SidePanel() {
 		const title = String(formData.get("title"))
 		const note = String(formData.get("note"))
 		const ticker = formData.get("ticker") !== null ? String(formData.get("ticker")) : ""
-		const id = String(Date.now())
+		const id = String(formData.get("id")) === "" ? String(Date.now()) : String(formData.get("id"))
 
 		const newNote: Notes = {
 			id: id,
@@ -67,20 +87,46 @@ function SidePanel() {
 
 		form.reset();
 		clearForm();
+		renderList();
 		// render the notes list at the back.
 	}
 	const [isOpen, setIsOpen] = useState(false)
 	const toggleDrawer = () => {
-			setIsOpen((prevState) => !prevState)
+		setIsOpen((prevState) => !prevState)
 	}
+
+	function viewSavedNote(note: Notes) {
+		// populate back all the items.
+		setCurrUrl(note.source)
+		setHighlightedText(note.quote)
+		setNote(note.note)
+		setNoteId(note.id)
+		setNoteTicker(note.ticker)
+		setNoteTitle(note.title)
+		toggleDrawer();
+		renderList();
+
+		setIntent(Intent.update)
+	}
+
+	function deleteSavedNote(note: Notes) {
+		noteStorage.del(note);
+		renderList();
+	}
+	function downloadNote(note: Notes) {
+		// download from
+		window.prompt()
+	}	
 	return (
 
 		<main className="border-2 border-emerald-600 min-h-[90vh] m-1 rounded">
 			<form onSubmit={(e) => saveNote(e)} className="m-3 flex flex-col gap-3">
+				<input type="hidden" name="intent" value={intent} />
+				<input type="hidden" name="id" value={noteId} />
 				<label htmlFor="title">Note Title:</label>
-				<input name="title" type="text" className="rounded" required />
+				<input name="title" type="text" className="rounded" defaultValue={noteTitle} required />
 				<label htmlFor="ticker">Ticker: <small>(optional)</small></label>
-				<input name="ticker" type="text" className="rounded" />
+				<input name="ticker" type="text" className="rounded" defaultValue={noteTicker} />
 				<label htmlFor="highlightedText">Quote: <small>(highlighted text on the page)</small></label>
 				<input type="hidden" aria-label="highlighted quotes" value={highlightedText} name="highlightedText" id="highlightedText" />
 				<blockquote className="min-h-32 border-2 border-emerald-600 rounded max-h-60 overflow-y-auto">
@@ -100,22 +146,38 @@ function SidePanel() {
 					<button>save</button>
 					<button type="reset" onClick={() => clearForm()}>clear</button>
 				</div>
-				<button type="button" onClick={toggleDrawer}>Show</button>
-            <Drawer
-                open={isOpen}
-                onClose={toggleDrawer}
-                direction='bottom'
-                className='bla bla bla'
-								size={"95vh"}
-            >
-							<button type="button" onClick={toggleDrawer}>x</button>
-                <div>Hello World</div>
-            </Drawer>
 			</form>
 
+			<button type="button" onClick={toggleDrawer}>Show</button>
+			<Drawer
+				open={isOpen}
+				onClose={toggleDrawer}
+				direction='bottom'
+				className='bla bla bla'
+				size={"95vh"}
+			>
+				<button type="button" onClick={toggleDrawer}>x</button>
+				{savedNotes !== undefined && savedNotes!.length > 0 ?
+					savedNotes.map((note: Notes) => (
+						<form className="rounded border-2 border-emerald-600 m-2 p-2">
+							<p>title: {note.title} </p>
+							{note.ticker !== null ?
+								< p > ticker: {note.ticker} </p>
+								:
+								<></>
+							}
+							<p className="truncate">note: {note.note} </p>
+							<button type="button" onClick={() => viewSavedNote(note)}>🔎</button>
+							<button type="button" onClick={() => deleteSavedNote(note)}>🗑️</button>
+							<button type="button" onClick={() => downloadNote(note)}>📑</button>
+						</form>
+					))
+
+					: <> No notes yet! :( </>}
+			</Drawer>
 			{/* hidden list of notes on the bottom or on the side */}
-			
-		</main>
+
+		</main >
 	)
 }
 export default SidePanel;

@@ -92,12 +92,12 @@ function getSelection() {
 		if (selection.rangeCount > 0) {
 			// opt-out because it is not persistent yet.
 			// highlightText(selection)
-
+			const id = String(Date.now())
 			let capturedText = document.getSelection()?.toString();
 
 			if (capturedText?.trim() !== "") {
 				const port = chrome.runtime.connect({ name: "textHighlight" })
-				port.postMessage({ text: capturedText, from: "content", url: window.location.href, })
+				port.postMessage({ text: capturedText, from: "content", url: window.location.href, id: id })
 			}
 
 		}

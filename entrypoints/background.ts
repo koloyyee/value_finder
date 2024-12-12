@@ -107,7 +107,7 @@ function sidePanel() {
 }
 
 async function contextMenuOpenPanel() {
-
+	// TODO: add the highlighted text to side panel quote section.
 	chrome.contextMenus.create({
 		id: 'openSidePanel',
 		title: 'Open side panel',
@@ -120,5 +120,11 @@ async function contextMenuOpenPanel() {
 			// This will open the panel in all the pages on the current window.
 			chrome.sidePanel.open({ tabId: tab.id, windowId: tab.windowId });
 		}
+	})
+
+	const port = chrome.runtime.connect({ name: "textHighlight" });
+	port.onMessage.addListener( msg => {
+		console.log("received from background in content.ts")
+		console.log(msg)
 	})
 }

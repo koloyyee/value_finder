@@ -60,9 +60,14 @@ export class NotesStorageImp implements Storage {
 
 		// a note 
 		if (value instanceof Object) {
+			// console.log(value)
+			// const targetKey = Object.keys(value).
 			const index = notes.findIndex(n =>
-				Object.keys(n).every(k => n[k] === value[k])
+				Object.keys(n).some(k => n[k] === value[k])
 			)
+			if( index === -1) {
+				return [];
+			}
 			return [notes[index]]
 
 		} else {
@@ -78,7 +83,7 @@ export class NotesStorageImp implements Storage {
 			}
 		}
 
-		return undefined;
+		return notes;
 	}
 
 	async update(id: string, newNote: Notes): Promise<{ err: null | string; }> {
@@ -112,8 +117,10 @@ export class NotesStorageImp implements Storage {
 		})
 		return { err: null }
 	}
-	clear(): Promise<void> {
-		throw new Error("Method not implemented.");
+	async clear(): Promise<void> {
+		await this.storage.set({
+			[this.collectionName] : []
+		})
 	}
 
 }
@@ -130,6 +137,12 @@ export class BookmarksStorageImp implements Storage {
 		this.collectionName = collectionName.trim() === "" ? this.collectionName = Collection.bookmarks : collectionName
 	}
 
+	/**
+	 * 
+	 * @param key ticker name
+	 * @param bookmarkKV {bookmarkName: bookmarkUrl}
+	 * @returns 
+	 */
 	async save(
 		key: string,
 		bookmarkKV: { [name: string]: string },
@@ -246,8 +259,10 @@ export class BookmarksStorageImp implements Storage {
 		}
 	}
 
-	clear(): Promise<void> {
-		throw new Error("Method not implemented.");
+	async clear(): Promise<void> {
+		await this.storage.set({
+			[this.collectionName] : {}
+		})
 	}
 }
 

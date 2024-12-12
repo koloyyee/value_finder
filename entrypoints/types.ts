@@ -10,6 +10,12 @@ export const Collection = {
   mockNotes: "mock_notes" as const,
 } as const;
 
+export const Intent = {
+	create: "create" as const,
+	update: "update" as const,
+	del: "delete" as const,
+} as const
+
 /**
  * bookmarks : {
  * 	aapl : [

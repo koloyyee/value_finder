@@ -1,3 +1,4 @@
+import { json2csv } from "json-2-csv";
 import { ChangeEvent } from "react";
 import Drawer from 'react-modern-drawer';
 import 'react-modern-drawer/dist/index.css';
@@ -33,6 +34,12 @@ function SidePanel() {
 						setCurrUrl(msg.url);
 						setNoteId(msg.id);
 					})
+
+				}
+				return () => {
+					port.onDisconnect.addListener(() => {
+						console.error("Port disconnected");
+					});
 				}
 			})
 			renderList();
@@ -89,7 +96,7 @@ function SidePanel() {
 				}
 			}
 			case Intent.update: {
-				const {err} = await noteStorage.update(id, newNote);
+				const { err } = await noteStorage.update(id, newNote);
 			}
 		}
 
@@ -121,9 +128,20 @@ function SidePanel() {
 		noteStorage.del(note);
 		renderList();
 	}
-	function downloadNote(note: Notes) {
-		// download from
-		window.prompt()
+	async function downloadNotes() {
+		const notes = await noteStorage.get();
+		console.log("downloading notes")
+		console.log(notes)
+		const converted = json2csv(notes)
+		console.log(converted)
+		const file = new Blob([converted], { type: "text/csv" })
+		const csvUrl = URL.createObjectURL(file);
+		const link = document.createElement('a');
+		link.href = csvUrl;
+		link.download = `somefile.csv`;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
 	}
 	return (
 
@@ -142,7 +160,7 @@ function SidePanel() {
 				</blockquote>
 				{/* <small> Remove Highlight: de-select text, right-click the highlighted text</small> */}
 				{currUrl !== "" ? (
-					<small className="truncate">source: {currUrl}</small>
+					<small className="truncate">source: <a href={currUrl} target="_blank"> {currUrl}</a> </small>
 				) : <></>}
 				<label htmlFor="note">Notes:</label>
 				<textarea className="min-h-32 rounded"
@@ -177,14 +195,14 @@ function SidePanel() {
 							<p className="truncate">note: {note.note} </p>
 							<button type="button" onClick={() => viewSavedNote(note)}>🔎</button>
 							<button type="button" onClick={() => deleteSavedNote(note)}>🗑️</button>
-							<button type="button" onClick={() => downloadNote(note)}>📑</button>
 						</form>
 					))
 
 					: <> No notes yet! :( </>}
 			</Drawer>
 			{/* hidden list of notes on the bottom or on the side */}
-
+			download as csv
+			<button type="button" onClick={async () => await downloadNotes()}>📑</button>
 		</main >
 	)
 }

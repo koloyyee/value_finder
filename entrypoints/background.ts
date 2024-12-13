@@ -2,9 +2,9 @@ import { Collection } from "./types";
 
 export default defineBackground(() => {
 
-	retransmit();
-	(async () => openSidePanel())();
 	chrome.runtime.onInstalled.addListener(() => {
+		retransmit();
+		(async () => openSidePanel())();
 		contextMenuOpenPanel();
 	})
 
@@ -25,6 +25,11 @@ async function openSidePanel() {
 
 function retransmit() {
 	chrome.runtime.onConnect.addListener((port) => {
+		port.onDisconnect.addListener(() => {
+			if (chrome.runtime.lastError) {
+				console.error("Port disconnection error:", chrome.runtime.lastError);
+			}
+		});
 		port.onMessage.addListener(msg => {
 			// console.log(`TICKER: Received from content on port: ${port.name}`)
 			// console.log({ msg })
@@ -122,9 +127,4 @@ async function contextMenuOpenPanel() {
 		}
 	})
 
-	const port = chrome.runtime.connect({ name: "textHighlight" });
-	port.onMessage.addListener(msg => {
-		console.log("received from background in content.ts")
-		console.log(msg)
-	})
 }

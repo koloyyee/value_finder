@@ -1,6 +1,6 @@
 import { BASE, ScreenerStorageImpl } from "../storage";
 import { Screeners } from "../types";
-import { extractTicker } from "./utils";
+import { extractTicker, insider, quarterAnnual } from "./utils";
 
 
 
@@ -20,16 +20,38 @@ const ScreenerSaver: React.FC = () => {
 	useEffect(() => {
 		(async () => {
 			const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+			const ticker = extractTicker(tab.url!) ?? "";
+
 			if (tab.url!.includes("quote.ashx")) {
-				setCurrTicker((extractTicker(tab.url!) ?? ""))
-				const compPort = chrome.runtime.connect({ name: "comp" })
-				compPort.onMessage.addListener(msg => {
-					// console.log(`Received from background CoMp`)
-					// console.log({msg})
-					setSecReportUrl(msg.secReport);
-					setCompanyUrl(msg.companyUrl)
-					setInsiderFiling(msg.insider)
-				})
+				setCurrTicker(ticker)
+
+				try {
+
+					const compPort = chrome.runtime.connect({ name: "comp" })
+
+					if (compPort) {
+
+						compPort.onMessage.addListener(msg => {
+							// console.log(msg)
+							setSecReportUrl(msg.secReport != undefined ? msg.secReport : quarterAnnual(ticker))
+							setInsiderFiling(msg.insider != undefined ? msg.insider : insider(ticker))
+							setCompanyUrl(msg.companyUrl)
+
+							return () => {
+								compPort.onDisconnect.addListener(() => {
+									console.error("Port disconnected");
+								});
+							}
+						})
+					} else {
+						console.log(compPort)
+						setSecReportUrl(quarterAnnual(ticker))
+						setCurrTicker(insider(ticker))
+
+					}
+				} catch (error) {
+					console.error(error)
+				}
 
 				// for testing purpose
 				// const compPort = chrome.runtime.connect({ name: "comp" })
@@ -40,10 +62,13 @@ const ScreenerSaver: React.FC = () => {
 				// 	setCompanyUrl(msg.companyUrl)
 				// })
 			} else {
+				console.log("not in quote.ashx.")
 				setSecReportUrl("")
 				setCurrTicker("")
 			}
+
 		})();
+
 	}, [secReportUrl])
 
 
@@ -205,16 +230,16 @@ const ScreenerSaver: React.FC = () => {
 
 				</div>
 
-				{currTicker && (
+				{companyUrl && (
 					<>
 						<hr className='my-2' />
 						<div className="p-1 m-3 border-b-2 border-emerald-600 rounded">
 							<span className="font-semi text-[1.0rem]">{currTicker}: </span>
 							<a href={secReportUrl} target="_blank">  Quarter & Annual (10Q&10K) </a>
-							 <span className="text-pink-700">|</span> 
-							 <a href={insiderFiling} target="_blank"> Insider(144) </a>
-							 <span className="text-pink-700">|</span> 
-							 <a href={companyUrl} target="_blank"> Homepage / IR</a>
+							<span className="text-pink-700">|</span>
+							<a href={insiderFiling} target="_blank"> Insider(144) </a>
+							<span className="text-pink-700">|</span>
+							<a href={companyUrl} target="_blank"> Homepage / IR</a>
 						</div>
 					</>
 				)}

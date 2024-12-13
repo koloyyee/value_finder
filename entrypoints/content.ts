@@ -5,12 +5,12 @@ export default defineContentScript({
 	matches: ['<all_urls>'],
 	main() {
 		const url = window.location.href;
-		if (url.includes("quote.ashx")) {
-			passingTicker(url);
-		}
+		// if (url.includes("quote.ashx")) {
+		passingTicker(url);
+		// }
 		// getSelection();
 		document.onmouseup = getSelection
-		document.oncontextmenu = removeSpecificHighlight
+		// document.oncontextmenu = removeSpecificHighlight
 	}
 });
 
@@ -28,12 +28,10 @@ function passingCompanyUrl() {
 
 function passingTicker(url: string) {
 	const href = document.querySelector(".quote-header_ticker-wrapper_company")?.querySelector("a")?.getAttribute("href");
-	const port = chrome.runtime.connect({ name: "comp" });
 	const ticker = extractTicker(url);
 	if (ticker && href) {
+		const port = chrome.runtime.connect({ name: "comp" });
 		port.postMessage({ ticker, from: "start from content passingTicker", companyUrl: href })
-	} else {
-		console.error("url not matched.")
 	}
 }
 
@@ -96,8 +94,15 @@ function getSelection() {
 			let capturedText = document.getSelection()?.toString();
 
 			if (capturedText?.trim() !== "") {
-				const port = chrome.runtime.connect({ name: "textHighlight" })
-				port.postMessage({ text: capturedText, from: "content", url: window.location.href, id: id })
+				try {
+					const port = chrome.runtime.connect({ name: "textHighlight" })
+					port.postMessage({ text: capturedText, from: "content", url: window.location.href, id: id })
+					port.onMessage.addListener((msg) => {
+						console.log("Content script received message:", msg);
+					});
+				} catch (error) {
+					console.error(error)
+				}
 			}
 
 		}

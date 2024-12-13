@@ -71,6 +71,7 @@ const SecBookmarks: React.FC = () => {
 		chrome.runtime.sendMessage({ action: "open_side_panel" })
 		window.close()
 	}
+
 	return (
 		<div className="m-2 p-3 border-2 border-emerald-600 rounded ">
 			{/* <button type="button" onClick={() => window.prompt()}>open</button> */}

@@ -29,8 +29,8 @@ export default defineContentScript({
 		passingTicker(url);
 		// getSelection();
 		// document.addEventListener('DOMContentLoaded', function () {
-			// getSelection();
-			document.onmouseup = getSelection
+		// getSelection();
+		document.onmouseup = getSelection
 		// });
 		// document.oncontextmenu = removeSpecificHighlight
 	}
@@ -54,6 +54,9 @@ function passingTicker(url: string) {
 function getSelection() {
 
 	const selection = window.getSelection();
+	if (chrome.runtime) {
+		chrome.runtime.sendMessage({ action: "open_side_panel", })
+	}
 
 	if (selection) {
 
@@ -66,8 +69,6 @@ function getSelection() {
 			if (capturedText?.trim() !== "") {
 				try {
 
-					// chrome.runtime.sendMessage({ action: "open_side_panel", })
-					chrome.runtime.sendMessage({ type: 'log', message: "reolai" });
 					const port = chrome.runtime.connect({ name: "textHighlight" })
 					port.postMessage({ text: capturedText, from: "content", url: window.location.href, id: id })
 					port.onMessage.addListener((msg) => {

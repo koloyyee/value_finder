@@ -9,23 +9,24 @@ export default defineBackground(() => {
 		// trackSidePanelState();
 	})
 
-	let sidePanelOpen = false;
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "is_side_panel_open") {
-    sendResponse({ sidePanelOpen: sidePanelOpen });
-  }
-});
+// 	let sidePanelOpen = false;
 
-let isSidePanelOpen = false;
-chrome.runtime.onConnect.addListener(function (port) {
-  if (port.name === "textHighlight") {
-    isSidePanelOpen = true;
-    port.onDisconnect.addListener(() => {
-      isSidePanelOpen = false;
-    });
-  }
-});
+// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+//   if (message.action === "is_side_panel_open") {
+//     sendResponse({ sidePanelOpen: sidePanelOpen });
+//   }
+// });
+
+// let isSidePanelOpen = false;
+// chrome.runtime.onConnect.addListener(function (port) {
+//   if (port.name === "textHighlight") {
+//     isSidePanelOpen = true;
+//     port.onDisconnect.addListener(() => {
+//       isSidePanelOpen = false;
+//     });
+//   }
+// });
 });
 
 
@@ -54,13 +55,13 @@ async function openSidePanel() {
 	if (tab) {
 		chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 			console.log(msg, sender)
-			// if (tab.windowId !== undefined) {
-			// 	chrome.sidePanel.open({ windowId: tab.windowId });
-			// }
-			// if (msg.action === "open_side_panel") {
+			if (tab.windowId !== undefined) {
+				chrome.sidePanel.open({ windowId: tab.windowId });
+			}
+			if (msg.action === "open_side_panel") {
 				chrome.sidePanel.open({ windowId: tab.windowId })
 
-			// }
+			}
 		})
 	}
 }

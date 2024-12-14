@@ -5,25 +5,6 @@ export default defineContentScript({
 	matches: ['<all_urls>'],
 	main() {
 
-		const highlight = chrome.runtime.connect({ name: "textHighlight" })
-		const comp = chrome.runtime.connect({ name: "comp" });
-
-		highlight.onMessage.addListener((msg) => {
-			console.log("connected from textHighlight")
-		})
-
-		comp.onMessage.addListener((msg) => {
-			console.log("connected from comp")
-		})
-		highlight.postMessage({ text: "", from: "content connection established", url: "", })
-		comp.postMessage({ ticker: "", from: "content connection established", companyUrl: "" })
-
-		highlight.onDisconnect.addListener(() => {
-			console.log("disconnected from textHighlight")
-		})
-		comp.onDisconnect.addListener(() => {
-			console.log("disconnected from comp")
-		})
 
 		const url = window.location.href;
 		passingTicker(url);
@@ -33,6 +14,30 @@ export default defineContentScript({
 		document.onmouseup = getSelection
 		// });
 		// document.oncontextmenu = removeSpecificHighlight
+		chrome.runtime.onStartup.addListener(() => {
+				chrome.runtime.sendMessage({ action: "open_side_panel", })
+
+			const highlight = chrome.runtime.connect({ name: "textHighlight" })
+			const comp = chrome.runtime.connect({ name: "comp" });
+
+			highlight.onMessage.addListener((msg) => {
+				console.log("connected from textHighlight")
+			})
+
+			comp.onMessage.addListener((msg) => {
+				console.log("connected from comp")
+			})
+			highlight.postMessage({ text: "", from: "content connection established", url: "", })
+			comp.postMessage({ ticker: "", from: "content connection established", companyUrl: "" })
+
+			highlight.onDisconnect.addListener(() => {
+				console.log("disconnected from textHighlight")
+			})
+			comp.onDisconnect.addListener(() => {
+				console.log("disconnected from comp")
+			})
+
+		})
 	}
 });
 
@@ -54,10 +59,7 @@ function passingTicker(url: string) {
 function getSelection() {
 
 	const selection = window.getSelection();
-	if (chrome.runtime) {
-		chrome.runtime.sendMessage({ action: "open_side_panel", })
-	}
-
+	
 	if (selection) {
 
 		if (selection.rangeCount > 0) {

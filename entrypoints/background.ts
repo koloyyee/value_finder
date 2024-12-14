@@ -8,6 +8,24 @@ export default defineBackground(() => {
 		contextMenuOpenPanel();
 		// trackSidePanelState();
 	})
+
+	let sidePanelOpen = false;
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "is_side_panel_open") {
+    sendResponse({ sidePanelOpen: sidePanelOpen });
+  }
+});
+
+let isSidePanelOpen = false;
+chrome.runtime.onConnect.addListener(function (port) {
+  if (port.name === "textHighlight") {
+    isSidePanelOpen = true;
+    port.onDisconnect.addListener(() => {
+      isSidePanelOpen = false;
+    });
+  }
+});
 });
 
 
@@ -36,13 +54,13 @@ async function openSidePanel() {
 	if (tab) {
 		chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 			console.log(msg, sender)
-			if (tab.windowId !== undefined) {
-				chrome.sidePanel.open({ windowId: tab.windowId });
-			}
-			if (msg.action === "open_side_panel") {
+			// if (tab.windowId !== undefined) {
+			// 	chrome.sidePanel.open({ windowId: tab.windowId });
+			// }
+			// if (msg.action === "open_side_panel") {
 				chrome.sidePanel.open({ windowId: tab.windowId })
 
-			}
+			// }
 		})
 	}
 }
@@ -65,10 +83,10 @@ function retransmit() {
 						// console.log(`handled by background from port: ${port.name}`)
 						port.postMessage({ ticker: String(msg.ticker), secReport: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`, from: "ticker port - background", companyUrl: msg.companyUrl, insider: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=144` })
 					}
-					// if ( port.name === "comp") {
-					// 	console.log(`handled by background from port: ${port.name}`)
-					// 	port.postMessage({  from: "comp port - background", companyUrl: msg.companyUrl })
-					// }
+					if ( port.name === "textHighlight") {
+						console.log(`handled by background from port: ${port.name}`)
+						port.postMessage({  from: "comp port - background", text: ""})
+					}
 
 				})
 			}
@@ -93,50 +111,7 @@ async function screenersCollectionChecker() {
 	}
 }
 
-function sidePanel() {
-	const GOOGLE_ORIGIN = 'https://www.google.com';
-	chrome.sidePanel
-		.setPanelBehavior({ openPanelOnActionClick: true })
-		.catch((error) => console.error(error));
-	chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
-		if (!tab.url) return;
-		const url = new URL(tab.url)
 
-		if (url.origin === GOOGLE_ORIGIN) {
-			await chrome.sidePanel.setOptions({
-				tabId,
-				path: 'sidepanel.html',
-				enabled: true
-			});
-		} else {
-			// Disables the side panel on all other sites
-			await chrome.sidePanel.setOptions({
-				tabId,
-				enabled: false
-			});
-		}
-	});
-
-	chrome.runtime.onInstalled.addListener(() => {
-		chrome.contextMenus.create({
-			id: 'openSidePanel',
-			title: 'Open side panel',
-			contexts: ['all']
-		});
-
-	});
-
-	chrome.contextMenus.onClicked.addListener((info, tab) => {
-		if (tab.windowId !== undefined) {
-			chrome.sidePanel.open({ windowId: tab.windowId });
-		}
-
-		if (info.menuItemId === 'openSidePanel') {
-			// This will open the panel in all the pages on the current window.
-			chrome.sidePanel.open({ windowId: tab.windowId });
-		}
-	});
-}
 
 async function contextMenuOpenPanel() {
 	// TODO: add the highlighted text to side panel quote section.

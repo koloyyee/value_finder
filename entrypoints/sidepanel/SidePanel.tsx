@@ -22,14 +22,13 @@ function SidePanel() {
 
 	const [savedNotes, setSavedNotes] = useState<Notes[] | undefined>([]);
 
+	const [disableDL, setDisableDL] = useState(true)
+
 	useEffect(() => {
 		function getHighlighted() {
 			chrome.runtime.onConnect.addListener(port => {
 				if (port.name === "textHighlight") {
 					port.onMessage.addListener(msg => {
-						// console.log("Side Panel getting port msg")
-						console.log(msg)
-
 						setHighlightedText(msg.text);
 						setCurrUrl(msg.url);
 						setNoteId(msg.id);
@@ -43,15 +42,14 @@ function SidePanel() {
 				}
 			})
 			renderList();
-			console.log(savedNotes)
 		}
 		getHighlighted();
 	}, [])
 
 	async function renderList() {
-		const list = await noteStorage.get();
+		const list: Notes[] | undefined = (await noteStorage.get() as Notes[]) || [];
 		setSavedNotes(list)
-
+		setDisableDL(!(savedNotes && Object.keys(savedNotes).length === 0 && savedNotes?.length < 0 ))
 	}
 
 	function handleTextarea(e: ChangeEvent<HTMLTextAreaElement>): void {
@@ -129,19 +127,18 @@ function SidePanel() {
 		renderList();
 	}
 	async function downloadNotes() {
-		const notes = await noteStorage.get();
-		console.log("downloading notes")
-		console.log(notes)
-		const converted = json2csv(notes)
-		console.log(converted)
-		const file = new Blob([converted], { type: "text/csv" })
-		const csvUrl = URL.createObjectURL(file);
-		const link = document.createElement('a');
-		link.href = csvUrl;
-		link.download = `somefile.csv`;
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
+		const notes: object[] | undefined = await noteStorage.get();
+		if (notes && notes.length > 0) {
+			const converted = json2csv(notes)
+			const file = new Blob([converted], { type: "text/csv" })
+			const csvUrl = URL.createObjectURL(file);
+			const link = document.createElement('a');
+			link.href = csvUrl;
+			link.download = `value-finder-note${(new Date()).toLocaleDateString()}.csv`;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		}
 	}
 	return (
 
@@ -160,7 +157,7 @@ function SidePanel() {
 				</blockquote>
 				{/* <small> Remove Highlight: de-select text, right-click the highlighted text</small> */}
 				{currUrl !== "" ? (
-					<small className="truncate">source: <a href={currUrl} target="_blank"> {currUrl}</a> </small>
+					<small className="truncate">source: <a href={currUrl} target="_target"> {currUrl}</a> </small>
 				) : <></>}
 				<label htmlFor="note">Notes:</label>
 				<textarea className="min-h-32 rounded"
@@ -174,7 +171,7 @@ function SidePanel() {
 				</div>
 			</form>
 
-			<button type="button" onClick={toggleDrawer}>Show</button>
+			<button type="button" onClick={toggleDrawer}>📁</button>
 			<Drawer
 				open={isOpen}
 				onClose={toggleDrawer}
@@ -201,8 +198,10 @@ function SidePanel() {
 					: <> No notes yet! :( </>}
 			</Drawer>
 			{/* hidden list of notes on the bottom or on the side */}
-			download as csv
-			<button type="button" onClick={async () => await downloadNotes()}>📑</button>
+			download as csv 
+
+
+			<button type="button" disabled={disableDL} className={ disableDL ? "cursor-not-allowed hover:border-pink-700" : "cursor-pointer"} onClick={async () => await downloadNotes()}>⬇️</button>
 		</main >
 	)
 }

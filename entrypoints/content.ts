@@ -4,10 +4,14 @@ export default defineContentScript({
 	// matches: ['*://finviz.com/*'],
 	matches: ['<all_urls>'],
 	main() {
+
+		const highlight = chrome.runtime.connect({name : "textHighlight"})
+		const comp = chrome.runtime.connect({ name: "comp" });
+		highlight.postMessage({ text: "", from: "content connection established", url: "", })
+		comp.postMessage({ ticker: "", from: "content connection established", companyUrl : "" })
+
 		const url = window.location.href;
-		// if (url.includes("quote.ashx")) {
 		passingTicker(url);
-		// }
 		// getSelection();
 		document.onmouseup = getSelection
 		// document.oncontextmenu = removeSpecificHighlight
@@ -76,17 +80,25 @@ function highlightText(selection: Selection) {
 	span.appendChild(selectedText);
 	range.insertNode(span);
 }
-
+function checkSidePanelStatus(callback: () => void) {
+	chrome.runtime.sendMessage({ action: "check_side_panel_status" }, (response) => {
+		console.log(response)
+		if (response.isOpen) {
+			callback();
+		} else {
+			console.log("Side panel is closed");
+		}
+	});
+}
 /**
  * User can highlight the text and highlighted text will send to the side panel.
  */
 function getSelection() {
 
+
 	const selection = window.getSelection();
 
-	if (selection) {
-		const highlightMarking = String(Date.now());
-
+	if (selection ) {
 		if (selection.rangeCount > 0) {
 			// opt-out because it is not persistent yet.
 			// highlightText(selection)

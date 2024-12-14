@@ -66,9 +66,9 @@ const SecBookmarks: React.FC = () => {
 	}
 
 	function openSidePanel() {
-
 		console.log("sending action")
-		chrome.runtime.sendMessage({ action: "open_side_panel" })
+		chrome.runtime.sendMessage({ action: "open_side_panel", })
+		// chrome.runtime.sendMessage({ action: "open_side_panel", status: "panel_open" })
 		window.close()
 	}
 

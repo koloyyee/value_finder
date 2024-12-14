@@ -6,22 +6,47 @@ export default defineBackground(() => {
 		retransmit();
 		(async () => openSidePanel())();
 		contextMenuOpenPanel();
+		// trackSidePanelState();
 	})
-
 });
+
+
+function trackSidePanelState() {
+	let isSidePanelOpen = false;
+
+	chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+		if (msg.action === "open_side_panel") {
+			if (sender.tab?.windowId !== undefined) {
+				// chrome.sidePanel.open({ windowId: sender.tab.windowId });
+				isSidePanelOpen = true;
+				sendResponse({ status: "side_panel_opened" });
+			}
+		} else if (msg.action === "close_side_panel") {
+			isSidePanelOpen = false;
+			sendResponse({ status: "side_panel_closed" });
+		} else if (msg.action === "check_side_panel_status") {
+			sendResponse({ isOpen: isSidePanelOpen });
+		}
+	});
+}
 
 async function openSidePanel() {
 	const [tab] = await chrome.tabs.query({ active: true });
 
 	if (tab) {
-		chrome.runtime.onMessage.addListener(msg => {
-			console.log(msg)
+		chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+			console.log(msg, sender)
+			if (tab.windowId !== undefined) {
+				chrome.sidePanel.open({ windowId: tab.windowId });
+			}
 			if (msg.action === "open_side_panel") {
 				chrome.sidePanel.open({ windowId: tab.windowId })
+
 			}
 		})
 	}
 }
+
 
 function retransmit() {
 	chrome.runtime.onConnect.addListener((port) => {
@@ -102,7 +127,9 @@ function sidePanel() {
 	});
 
 	chrome.contextMenus.onClicked.addListener((info, tab) => {
-		if (!tab) return;
+		if (tab.windowId !== undefined) {
+			chrome.sidePanel.open({ windowId: tab.windowId });
+		}
 
 		if (info.menuItemId === 'openSidePanel') {
 			// This will open the panel in all the pages on the current window.

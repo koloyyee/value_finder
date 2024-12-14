@@ -1,7 +1,8 @@
 import { BASE, ScreenerStorageImpl } from "../storage";
-import { Screeners } from "../types";
-import { extractTicker, insider, quarterAnnual } from "./utils";
+import { CompObj, Screeners } from "../types";
+import { extractTicker, insider, quarterAnnualWCik } from "./utils";
 
+import compTickers from "@/assets/company_tickers.json";
 
 
 const ScreenerSaver: React.FC = () => {
@@ -15,12 +16,20 @@ const ScreenerSaver: React.FC = () => {
 	const [isFinvizPage, setIsFinvizPage] = useState(false);
 	const [insiderFiling, setInsiderFiling] = useState("")
 
-
+	// const tickersDB = compTickers.values();
+	// console.log(Object.values(compTickers))
 
 	useEffect(() => {
 		(async () => {
 			const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 			const ticker = extractTicker(tab.url!) ?? "";
+
+			const compObj: CompObj | undefined = Object.values(compTickers).find(obj => obj.ticker === ticker.toUpperCase());
+			console.log(compObj)
+			if (compObj) {
+				setSecReportUrl(quarterAnnualWCik(compObj.ticker, compObj.cik_str))
+				setInsiderFiling(insider(compObj.ticker))
+			}
 
 			if (tab.url!.includes("quote.ashx")) {
 				setCurrTicker(ticker)
@@ -32,35 +41,18 @@ const ScreenerSaver: React.FC = () => {
 					if (compPort) {
 
 						compPort.onMessage.addListener(msg => {
-							// console.log(msg)
-							setSecReportUrl(msg.secReport != undefined ? msg.secReport : quarterAnnual(ticker))
-							setInsiderFiling(msg.insider != undefined ? msg.insider : insider(ticker))
 							setCompanyUrl(msg.companyUrl)
-
 							return () => {
 								compPort.onDisconnect.addListener(() => {
 									console.error("Port disconnected");
 								});
 							}
 						})
-					} else {
-						console.log(compPort)
-						setSecReportUrl(quarterAnnual(ticker))
-						setCurrTicker(insider(ticker))
-
 					}
 				} catch (error) {
 					console.error(error)
 				}
 
-				// for testing purpose
-				// const compPort = chrome.runtime.connect({ name: "comp" })
-				// compPort.onMessage.addListener(msg => {
-				// 	console.log(`Received from background oMCp`)
-				// 	console.log({msg})
-				// 	// setSecUrl(msg.url);
-				// 	setCompanyUrl(msg.companyUrl)
-				// })
 			} else {
 				console.log("not in quote.ashx.")
 				setSecReportUrl("")

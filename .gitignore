@@ -26,3 +26,5 @@ web-ext.config.ts
 *.sw?
 # chrome build for testing
 chrome-mv3/
+*.mov
+*.zip

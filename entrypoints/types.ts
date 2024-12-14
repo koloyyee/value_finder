@@ -17,6 +17,19 @@ export const Intent = {
 } as const
 
 /**
+ * {
+ *	cik_str: 320193, 
+ *  ticker: 'AAPL', 
+ *  title: 'Apple Inc.'
+ * }
+ */
+export type CompObj = {
+	cik_str : number,
+	ticker : string,
+	title: string,
+}
+
+/**
  * bookmarks : {
  * 	aapl : [
  * 		{ "bookmarkName" : "link1" },

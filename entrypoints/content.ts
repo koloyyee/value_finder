@@ -15,7 +15,7 @@ export default defineContentScript({
 		// });
 		// document.oncontextmenu = removeSpecificHighlight
 		chrome.runtime.onStartup.addListener(() => {
-				chrome.runtime.sendMessage({ action: "open_side_panel", })
+			chrome.runtime.sendMessage({ action: "open_side_panel", })
 
 			const highlight = chrome.runtime.connect({ name: "textHighlight" })
 			const comp = chrome.runtime.connect({ name: "comp" });
@@ -38,6 +38,28 @@ export default defineContentScript({
 			})
 
 		})
+
+		let port = chrome.runtime.connect();
+
+		port.onDisconnect.addListener(() => {
+			chrome.runtime.lastError && console.error("Port disconnection error:", chrome.runtime.lastError);
+		});
+
+		document.addEventListener('visibilitychange', () => {
+			if (document.visibilityState === 'visible') {
+				// Page is visible again, re-establish connection if needed
+				if (!port || port.onDisconnect.hasListener( port => console.log(port.name) )) { // Check if the port is closed or listener has been removed
+					port = chrome.runtime.connect();
+					port.onDisconnect.addListener(() => {  //Add the disconnect listener again
+						chrome.runtime.lastError && console.error("Port disconnection error:", chrome.runtime.lastError);
+					});
+				}
+				// Resend any necessary messages
+			} else {
+				//Optional: Close the connection when the page is hidden
+				  if(port){ port.disconnect();}
+			}
+		});
 	}
 });
 
@@ -59,7 +81,7 @@ function passingTicker(url: string) {
 function getSelection() {
 
 	const selection = window.getSelection();
-	
+
 	if (selection) {
 
 		if (selection.rangeCount > 0) {

@@ -8,46 +8,16 @@ export default defineBackground(() => {
 		contextMenuOpenPanel();
 		// trackSidePanelState();
 	})
-
-
-// 	let sidePanelOpen = false;
-
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//   if (message.action === "is_side_panel_open") {
-//     sendResponse({ sidePanelOpen: sidePanelOpen });
-//   }
-// });
-
-// let isSidePanelOpen = false;
-// chrome.runtime.onConnect.addListener(function (port) {
-//   if (port.name === "textHighlight") {
-//     isSidePanelOpen = true;
-//     port.onDisconnect.addListener(() => {
-//       isSidePanelOpen = false;
-//     });
-//   }
-// });
+		var intervalId = setInterval(() => {
+			console.log("polling in background.ts")
+			if (!chrome.runtime?.id) {
+				// The extension was reloaded and this script is orphaned
+				clearInterval(intervalId);
+				return;
+			}
+		}, 45000);
 });
 
-
-function trackSidePanelState() {
-	let isSidePanelOpen = false;
-
-	chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-		if (msg.action === "open_side_panel") {
-			if (sender.tab?.windowId !== undefined) {
-				// chrome.sidePanel.open({ windowId: sender.tab.windowId });
-				isSidePanelOpen = true;
-				sendResponse({ status: "side_panel_opened" });
-			}
-		} else if (msg.action === "close_side_panel") {
-			isSidePanelOpen = false;
-			sendResponse({ status: "side_panel_closed" });
-		} else if (msg.action === "check_side_panel_status") {
-			sendResponse({ isOpen: isSidePanelOpen });
-		}
-	});
-}
 
 async function openSidePanel() {
 	const [tab] = await chrome.tabs.query({ active: true });
@@ -84,9 +54,9 @@ function retransmit() {
 						// console.log(`handled by background from port: ${port.name}`)
 						port.postMessage({ ticker: String(msg.ticker), secReport: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`, from: "ticker port - background", companyUrl: msg.companyUrl, insider: `https://www.sec.gov/edgar/search/#/category=custom&entityName=${msg.ticker}&forms=144` })
 					}
-					if ( port.name === "textHighlight") {
+					if (port.name === "textHighlight") {
 						console.log(`handled by background from port: ${port.name}`)
-						port.postMessage({  from: "comp port - background", text: ""})
+						port.postMessage({ from: "comp port - background", text: "" })
 					}
 
 				})

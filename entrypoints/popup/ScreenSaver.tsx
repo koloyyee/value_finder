@@ -31,7 +31,7 @@ const ScreenerSaver: React.FC = () => {
 				setInsiderFiling(insider(compObj.ticker))
 			}
 
-			if (tab.url!.includes("quote.ashx")) {
+			if (tab && tab.url && tab.url.includes("quote.ashx")) {
 				setCurrTicker(ticker)
 
 				try {
@@ -221,8 +221,7 @@ const ScreenerSaver: React.FC = () => {
 					</form>
 
 				</div>
-
-				{companyUrl && (
+				{currTicker && (
 					<>
 						<hr className='my-2' />
 						<div className="p-1 m-3 border-b-2 border-emerald-600 rounded">
@@ -230,11 +229,16 @@ const ScreenerSaver: React.FC = () => {
 							<a href={secReportUrl} target="_blank">  Quarter & Annual (10Q&10K) </a>
 							<span className="text-pink-700">|</span>
 							<a href={insiderFiling} target="_blank"> Insider(144) </a>
-							<span className="text-pink-700">|</span>
-							<a href={companyUrl} target="_blank"> Homepage / IR</a>
+							{companyUrl && (
+								<>
+									<span className="text-pink-700">|</span>
+									<a href={companyUrl} target="_blank"> Homepage / IR</a>
+								</>
+							)}
 						</div>
 					</>
 				)}
+
 			</section>
 		</div>
 	);

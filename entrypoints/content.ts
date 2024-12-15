@@ -8,36 +8,7 @@ export default defineContentScript({
 
 		const url = window.location.href;
 		passingTicker(url);
-		// getSelection();
-		// document.addEventListener('DOMContentLoaded', function () {
-		// getSelection();
 		document.onmouseup = getSelection
-		// });
-		// document.oncontextmenu = removeSpecificHighlight
-		chrome.runtime.onStartup.addListener(() => {
-			chrome.runtime.sendMessage({ action: "open_side_panel", })
-
-			const highlight = chrome.runtime.connect({ name: "textHighlight" })
-			const comp = chrome.runtime.connect({ name: "comp" });
-
-			highlight.onMessage.addListener((msg) => {
-				console.log("connected from textHighlight")
-			})
-
-			comp.onMessage.addListener((msg) => {
-				console.log("connected from comp")
-			})
-			highlight.postMessage({ text: "", from: "content connection established", url: "", })
-			comp.postMessage({ ticker: "", from: "content connection established", companyUrl: "" })
-
-			highlight.onDisconnect.addListener(() => {
-				console.log("disconnected from textHighlight")
-			})
-			comp.onDisconnect.addListener(() => {
-				console.log("disconnected from comp")
-			})
-
-		})
 
 		let port = chrome.runtime.connect();
 
@@ -45,21 +16,54 @@ export default defineContentScript({
 			chrome.runtime.lastError && console.error("Port disconnection error:", chrome.runtime.lastError);
 		});
 
-		document.addEventListener('visibilitychange', () => {
-			if (document.visibilityState === 'visible') {
-				// Page is visible again, re-establish connection if needed
-				if (!port || port.onDisconnect.hasListener( port => console.log(port.name) )) { // Check if the port is closed or listener has been removed
-					port = chrome.runtime.connect();
-					port.onDisconnect.addListener(() => {  //Add the disconnect listener again
-						chrome.runtime.lastError && console.error("Port disconnection error:", chrome.runtime.lastError);
-					});
-				}
-				// Resend any necessary messages
-			} else {
-				//Optional: Close the connection when the page is hidden
-				  if(port){ port.disconnect();}
+		// document.addEventListener('visibilitychange', () => {
+		// 	if (document.visibilityState === 'visible') {
+		// 		// Page is visible again, re-establish connection if needed
+		// 		if (!port || port.onDisconnect.hasListener(port => console.log(port.name))) { // Check if the port is closed or listener has been removed
+		// 			port = chrome.runtime.connect();
+		// 			port.onDisconnect.addListener(() => {  //Add the disconnect listener again
+		// 				chrome.runtime.lastError && console.error("Port disconnection error:", chrome.runtime.lastError);
+		// 			});
+		// 		}
+		// Resend any necessary messages
+
+		// chrome.runtime.sendMessage({ action: "open_side_panel", })
+		// if (chrome.runtime?.id) {
+		// const highlight = chrome.runtime.connect({ name: "textHighlight" })
+		// const comp = chrome.runtime.connect({ name: "comp" });
+
+		// highlight.onMessage.addListener((msg) => {
+		// 	console.log("connected from textHighlight")
+		// })
+
+		// comp.onMessage.addListener((msg) => {
+		// 	console.log("connected from comp")
+		// })
+		// highlight.postMessage({ text: "", from: "content connection established", url: "", })
+		// comp.postMessage({ ticker: "", from: "content connection established", companyUrl: "" })
+
+		// highlight.onDisconnect.addListener(() => {
+		// 	console.log("disconnected from textHighlight")
+		// })
+		// comp.onDisconnect.addListener(() => {
+		// 	console.log("disconnected from comp")
+		// })
+
+		// }
+
+		// 	} else {
+		// 		//Optional: Close the connection when the page is hidden
+		// 		if (port) { port.disconnect(); }
+		// 	}
+		// });
+		var intervalId = setInterval(() => {
+			console.log("polling in content.ts")
+			if (!chrome.runtime?.id) {
+				// The extension was reloaded and this script is orphaned
+				clearInterval(intervalId);
+				return;
 			}
-		});
+		}, 45000);
 	}
 });
 
@@ -67,8 +71,10 @@ function passingTicker(url: string) {
 	const href = document.querySelector(".quote-header_ticker-wrapper_company")?.querySelector("a")?.getAttribute("href");
 	const ticker = extractTicker(url);
 	if (ticker && href) {
-		const port = chrome.runtime.connect({ name: "comp" });
-		port.postMessage({ ticker, from: "start from content passingTicker", companyUrl: href })
+		if (chrome.runtime?.id) {
+			const port = chrome.runtime.connect({ name: "comp" });
+			port.postMessage({ ticker, from: "start from content passingTicker", companyUrl: href })
+		}
 	}
 }
 
@@ -92,15 +98,20 @@ function getSelection() {
 
 			if (capturedText?.trim() !== "") {
 				try {
+					console.log(chrome.runtime?.id)
+					if (chrome.runtime?.id) {
+						const port = chrome.runtime.connect({ name: "textHighlight" })
+						port.postMessage({ text: capturedText, from: "content", url: window.location.href, id: id })
 
-					const port = chrome.runtime.connect({ name: "textHighlight" })
-					port.postMessage({ text: capturedText, from: "content", url: window.location.href, id: id })
-					port.onMessage.addListener((msg) => {
-						console.log("Content script received message:", msg);
-					});
-					port.onDisconnect.addListener(() => {
-						console.log("disconnect from textHighlight")
-					})
+						port.onMessage.addListener((msg) => {
+							console.log("Content script received message:", msg);
+						});
+						port.onDisconnect.addListener(() => {
+							console.log("disconnect from textHighlight")
+						})
+					} else {
+
+					}
 				} catch (error) {
 					console.error(error)
 				}

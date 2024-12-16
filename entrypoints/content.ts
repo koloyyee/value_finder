@@ -59,31 +59,21 @@ async function getSelection() {
 			const id = String(Date.now())
 			let capturedText = document.getSelection()?.toString();
 
-			if (capturedText?.trim() !== "") {
-				if (chrome.runtime?.id) {
-					try {
-						// chrome.runtime.sendMessage({ action: "open_side_panel", status: "open" }).then(() => {
-							let port = chrome.runtime.connect({ name: "textHighlight" })
-							console.log(typeof port)
-							if (typeof port === 'undefined') return;
-							console.log( chrome.runtime)
-
-							port.postMessage({ text: capturedText, from: "content", url: window.location.href, id: id })
-							port.onMessage.addListener((msg) => {
-								console.log("Content script received message:", msg);
-							});
-							port.onDisconnect.addListener(() => {
-								console.log("disconnect from textHighlight")
-							})
-						// })
-					} catch (error) {
-						chrome.runtime.reload();
-					}
-				} else {
-
+			if (capturedText?.trim() !== "" && chrome.runtime?.id) {
+				try {
+					let port = chrome.runtime.connect({ name: "textHighlight" })
+					if (typeof port === 'undefined') return;
+					port.postMessage({ text: capturedText, from: "content", url: window.location.href, id: id })
+					port.onMessage.addListener((msg) => {
+						console.log("Content script received message:", msg);
+					});
+					port.onDisconnect.addListener(() => {
+						console.log("disconnect from textHighlight")
+					})
+				} catch (error) {
+					console.error(error)
 				}
 			}
-
 		}
 	}
 }

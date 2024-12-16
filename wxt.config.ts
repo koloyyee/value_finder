@@ -14,7 +14,7 @@ export default defineConfig({
 			// "tabs",
 			"sidePanel",
 			"contextMenus",
-			"scripting",
+			// "scripting",
 			// "aiLanguageModelOriginTrial"
 		],
 		side_panel : {

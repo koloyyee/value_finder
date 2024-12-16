@@ -33,13 +33,9 @@ const ScreenerSaver: React.FC = () => {
 
 			if (tab && tab.url && tab.url.includes("quote.ashx")) {
 				setCurrTicker(ticker)
-
 				try {
-
 					const compPort = chrome.runtime.connect({ name: "comp" })
-
 					if (compPort) {
-
 						compPort.onMessage.addListener(msg => {
 							setCompanyUrl(msg.companyUrl)
 							return () => {
@@ -183,11 +179,12 @@ const ScreenerSaver: React.FC = () => {
 					) : (
 						<div>
 							<p>The watchlist is empty :(</p>
-							<a href={BASE} target="_blank" rel="noopener noreferrer">
-								Go to Finviz Screener
-							</a>
 						</div>
 					)}
+
+					<a href={BASE} target="_blank" rel="noopener noreferrer">
+						Go to Finviz Screener
+					</a>
 				</div>
 
 				{/* {Object.keys(screeners).length > 0 && (

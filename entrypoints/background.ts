@@ -4,17 +4,21 @@ export default defineBackground(() => {
 
 	chrome.runtime.onInstalled.addListener(() => {
 		retransmit();
-		(async () => openSidePanel())();
-		contextMenuOpenPanel();
-		// trackSidePanelState();
+		// (async () => openSidePanel())();
+		// contextMenuOpenPanel();
 	})
 		var intervalId = setInterval(() => {
-			console.log("polling in background.ts")
+			// console.log("polling in background.ts")
 			if (!chrome.runtime?.id) {
 				// The extension was reloaded and this script is orphaned
 				clearInterval(intervalId);
 				return;
 			}
+			chrome.tabs.query({active: true, currentWindow: true},function(tabs) {
+				chrome.tabs.sendMessage(tabs[0].id as number, {greeting: "hello"}, function(response) {
+						console.log(response);
+				});
+			}); 
 		}, 45000);
 });
 
@@ -93,11 +97,16 @@ async function contextMenuOpenPanel() {
 	});
 
 	chrome.contextMenus.onClicked.addListener((info, tab) => {
-		if (!tab || !tab.id) return;
-		if (info.menuItemId === 'openSidePanel') {
+		// if (!tab || !tab.id) return;
+		// if (info.menuItemId === 'openSidePanel') {
 			// This will open the panel in all the pages on the current window.
-			chrome.sidePanel.open({ tabId: tab.id, windowId: tab.windowId });
-		}
+			chrome.sidePanel.open({  windowId: tab?.windowId as number });
+		// }
+		// chrome.windows.getCurrent({ populate: true }, (window) => {
+		// 	(chrome as any).sidePanel.open({ windowId: window.id });
+		// });
 	})
+	
+
 
 }

@@ -65,9 +65,9 @@ const SecBookmarks: React.FC = () => {
 		renderList();
 	}
 
-	function openSidePanel() {
-		console.log("sending action")
-		chrome.runtime.sendMessage({ action: "open_side_panel", })
+	async function openSidePanel() {
+		const [tab] = await chrome.tabs.query({ active: true});
+		chrome.sidePanel.open({tabId : tab?.id as number})
 		window.close()
 	}
 
@@ -79,7 +79,7 @@ const SecBookmarks: React.FC = () => {
 				<input name="ticker" placeholder="Ticker" className="py-2 rounded w-1/5" required />
 				<input name="bookmarkName" placeholder="Bookmark name e.g.: 2023-10q" className="py-2 rounded" required />
 				<button type="submit"> bookmark </button>
-				<button type="button" onClick={() => openSidePanel()}> Open Note </button>
+				<button type="button" onClick={async () => await openSidePanel()}> Open Note </button>
 
 			</form>
 			{bookmarks.size > 0 ?

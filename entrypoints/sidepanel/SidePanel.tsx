@@ -22,8 +22,6 @@ function SidePanel() {
 
 	const [savedNotes, setSavedNotes] = useState<Notes[] | undefined>([]);
 
-	const [disableDL, setDisableDL] = useState(true)
-
 	useEffect(() => {
 		function getHighlighted() {
 			chrome.runtime.onConnect.addListener(port => {
@@ -49,7 +47,6 @@ function SidePanel() {
 	async function renderList() {
 		const list: Notes[] | undefined = (await noteStorage.get() as Notes[]) || [];
 		setSavedNotes(list)
-		setDisableDL(!(savedNotes && Object.keys(savedNotes).length === 0 && savedNotes?.length < 0 ))
 	}
 
 	function handleTextarea(e: ChangeEvent<HTMLTextAreaElement>): void {
@@ -191,7 +188,7 @@ function SidePanel() {
 							}
 							<p className="truncate">note: {note.note} </p>
 							<button type="button" onClick={() => viewSavedNote(note)}>🔎</button>
-							<button type="button" onClick={() => deleteSavedNote(note)}>🗑️</button>
+							<button type="button" onClick={() => deleteSavedNote(note)}>(double click)🗑️</button>
 						</form>
 					))
 
@@ -199,9 +196,7 @@ function SidePanel() {
 			</Drawer>
 			{/* hidden list of notes on the bottom or on the side */}
 			download as csv 
-
-
-			<button type="button" disabled={disableDL} className={ disableDL ? "cursor-not-allowed hover:border-pink-700" : "cursor-pointer"} onClick={async () => await downloadNotes()}>⬇️</button>
+			<button type="button" disabled={savedNotes?.length === 0 } className={ savedNotes?.length === 0  ? "cursor-not-allowed hover:border-pink-700" : "cursor-pointer"} onClick={async () => await downloadNotes()}>⬇️</button>
 		</main >
 	)
 }

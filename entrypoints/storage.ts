@@ -123,6 +123,7 @@ export class NotesStorageImp implements Storage {
 		})
 	}
 
+	
 }
 
 export class BookmarksStorageImp implements Storage {

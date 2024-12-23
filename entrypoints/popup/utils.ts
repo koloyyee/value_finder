@@ -25,3 +25,10 @@ return `https://www.sec.gov/edgar/search/#/category=custom&ciks=${processedCik}&
 
 
 export const insider = (ticker: string) => `https://www.sec.gov/edgar/search/#/category=custom&entityName=${ticker}&forms=144`;
+
+export function parseDate(dateString: string): Date {
+	const [date, time ] = dateString.split(", ");
+	const [day, month, year] = date.split("/").map(Number)
+	const [hrs, mins, secs] = time.split(":").map(Number)
+	return new Date(year, month - 1, day, hrs, mins, secs)
+}

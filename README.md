@@ -20,6 +20,13 @@ Note taking:
 
 Save notes with source, quotes, ticker(optional), title, and note.
 
+## TODO
+
+Notes:
+[] - created at and updated to all the notes.
+[] - can be grouped by ticker,
+[] - support sort by title and ticker alphabetically, and created date chronologically.
+
 ## Suggestions?
 
 If you have any suggestion for other functionality please open issue!

@@ -1,13 +1,13 @@
-export default defineUnlistedScript(() => {});
+export default defineUnlistedScript(() => { });
 
 /** Types  */
 export const Collection = {
-  screeners: "screeners" as const,
-  bookmarks: "bookmarks" as const,
-  notes: "notes" as const,
-  mockScreeners: "mock_screeners" as const,
-  mockBookmarks: "mock_bookmarks" as const,
-  mockNotes: "mock_notes" as const,
+	screeners: "screeners" as const,
+	bookmarks: "bookmarks" as const,
+	notes: "notes" as const,
+	mockScreeners: "mock_screeners" as const,
+	mockBookmarks: "mock_bookmarks" as const,
+	mockNotes: "mock_notes" as const,
 } as const;
 
 export const Intent = {
@@ -15,6 +15,14 @@ export const Intent = {
 	update: "update" as const,
 	del: "delete" as const,
 } as const
+
+export const SortValue = {
+	nameAsc : "nameAsc" as const,
+	nameDesc: "nameDesc" as const,
+	dateAsc : "dateAsc" as const,
+	dateDesc: "dateDesc" as const
+}
+
 
 /**
  * {
@@ -24,8 +32,8 @@ export const Intent = {
  * }
  */
 export type CompObj = {
-	cik_str : number,
-	ticker : string,
+	cik_str: number,
+	ticker: string,
 	title: string,
 }
 
@@ -42,11 +50,11 @@ export type CompObj = {
  * }
  */
 export type Bookmarks = {
-  [ticker: string]: BookmarkKV;
+	[ticker: string]: BookmarkKV;
 }
 
 export type BookmarkKV = {
-  [bookmarkName: string]: string;
+	[bookmarkName: string]: string;
 }
 
 /**
@@ -56,7 +64,7 @@ export type BookmarkKV = {
  * ]
  */
 export type Screeners = {
-  [screener: string]: string;
+	[screener: string]: string;
 }
 
 
@@ -68,10 +76,22 @@ export type Screeners = {
  * 			ticker: ticker (optional),
  * 			quote: highlightedText,
  * 			note: notesUserTyped		
+ * 			lastUpdated: date
  * 		}
  * 	}
  * ]
  */
+// export interface Notes {
+// 	[key:string ] : string | Date,
+// 	lastUpdated : Date 
+// }
+
 export interface Notes {
-	[key:string ] : string 
+	id: string
+	title: string
+	source: string
+	ticker?: string
+	quote: string
+	note: string
+	lastUpdated: string 
 }

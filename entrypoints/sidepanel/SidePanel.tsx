@@ -2,8 +2,9 @@ import { json2csv } from "json-2-csv";
 import { ChangeEvent } from "react";
 import Drawer from 'react-modern-drawer';
 import 'react-modern-drawer/dist/index.css';
+import { parseDate } from "../popup/utils";
 import { NotesStorageImp } from "../storage";
-import { Intent, Notes } from "../types";
+import { Intent, Notes, SortValue } from "../types";
 
 function SidePanel() {
 	const noteStorage = new NotesStorageImp(chrome.storage.local);
@@ -44,6 +45,35 @@ function SidePanel() {
 		getHighlighted();
 	}, [])
 
+	function sortList(event: ChangeEvent<HTMLSelectElement>) {
+		const picked = event.currentTarget.value;
+
+		switch (picked) {
+			case SortValue.nameAsc: {
+				const nameAZ = savedNotes?.slice().sort((note1, note2) => note1.title.localeCompare(note2.title));
+				setSavedNotes(nameAZ);
+				break;
+			}
+			case SortValue.nameDesc: {
+				const nameZA = savedNotes?.slice().sort((note1, note2) => note2.title.localeCompare(note1.title));
+				setSavedNotes(nameZA);
+				break;
+			}
+			case SortValue.dateAsc: {
+				const dateAZ = savedNotes?.slice().sort((note1, note2) => parseDate(note2.lastUpdated).getTime() - parseDate(note1.lastUpdated).getTime());
+				setSavedNotes(dateAZ);
+				break;
+			}
+			case SortValue.dateDesc: {
+				const dateZA = savedNotes?.slice().sort((note1, note2) => parseDate(note1.lastUpdated).getTime() - parseDate(note2.lastUpdated).getTime());
+				setSavedNotes(dateZA);
+				break;
+			}
+			default:
+				break
+		}
+	}
+
 	async function renderList() {
 		const list: Notes[] | undefined = (await noteStorage.get() as Notes[]) || [];
 		setSavedNotes(list)
@@ -80,11 +110,13 @@ function SidePanel() {
 			source: currUrl,
 			ticker: ticker,
 			quote: highlightedText,
-			note: note
+			note: note,
+			lastUpdated: new Date().toLocaleString()
 		}
 		const intent = String(formData.get("intent"));
 		switch (intent) {
 			case Intent.create: {
+				console.log(newNote)
 				const { err } = await noteStorage.save(title, newNote);
 				if (err) {
 					console.error(err)
@@ -111,7 +143,7 @@ function SidePanel() {
 		setHighlightedText(note.quote)
 		setNote(note.note)
 		setNoteId(note.id)
-		setNoteTicker(note.ticker)
+		setNoteTicker(note.ticker ?? "")
 		setNoteTitle(note.title)
 		toggleDrawer();
 		renderList();
@@ -177,6 +209,13 @@ function SidePanel() {
 				size={"95vh"}
 			>
 				<button type="button" onClick={toggleDrawer}>x</button>
+				<select onChange={(e) => sortList(e)}>
+					<option value="nameAsc">Name A-Z</option>
+					<option value="nameDesc">Name Z-A</option>
+					<option value="dateAsc">From Newest</option>
+					<option value="dateDesc">From Oldest</option>
+				</select>
+				<p>double click to confirm delete.</p>
 				{savedNotes !== undefined && savedNotes!.length > 0 ?
 					savedNotes.map((note: Notes) => (
 						<form className="rounded border-2 border-emerald-600 m-2 p-2">
@@ -187,16 +226,17 @@ function SidePanel() {
 								<></>
 							}
 							<p className="truncate">note: {note.note} </p>
+							<p className="text-[0.5rem]">since: {note.lastUpdated}</p>
 							<button type="button" onClick={() => viewSavedNote(note)}>🔎</button>
-							<button type="button" onClick={() => deleteSavedNote(note)}>(double click)🗑️</button>
+							<button type="button" onClick={() => deleteSavedNote(note)}>🗑️</button>
 						</form>
 					))
 
 					: <> No notes yet! :( </>}
 			</Drawer>
 			{/* hidden list of notes on the bottom or on the side */}
-			download as csv 
-			<button type="button" disabled={savedNotes?.length === 0 } className={ savedNotes?.length === 0  ? "cursor-not-allowed hover:border-pink-700" : "cursor-pointer"} onClick={async () => await downloadNotes()}>⬇️</button>
+			download as csv
+			<button type="button" disabled={savedNotes?.length === 0} className={savedNotes?.length === 0 ? "cursor-not-allowed hover:border-pink-700" : "cursor-pointer"} onClick={async () => await downloadNotes()}>⬇️</button>
 		</main >
 	)
 }

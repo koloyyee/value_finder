@@ -25,7 +25,6 @@ const ScreenerSaver: React.FC = () => {
 			const ticker = extractTicker(tab.url!) ?? "";
 
 			const compObj: CompObj | undefined = Object.values(compTickers).find(obj => obj.ticker === ticker.toUpperCase());
-			console.log(compObj)
 			if (compObj) {
 				setSecReportUrl(quarterAnnualWCik(compObj.ticker, compObj.cik_str))
 				setInsiderFiling(insider(compObj.ticker))
@@ -128,10 +127,16 @@ const ScreenerSaver: React.FC = () => {
 		window.close();
 	};
 
+	async function openSidePanel() {
+		const [tab] = await chrome.tabs.query({ active: true });
+		chrome.sidePanel.open({ tabId: tab?.id as number })
+		window.close()
+	}
+
 	return (
-		<div>
+		<div className="w-max">
 			<p id="errorMsg" className=" text-pink-500" aria-label='error-message'> {errorMsg} </p>
-			<section className="p-4 m-3 border-2 border-emerald-600 rounded">
+			<section className="p-2 border-2 border-emerald-600 rounded">
 				<form
 					id="favoritesForm"
 					onSubmit={favoritesFormHandler}
@@ -153,15 +158,14 @@ const ScreenerSaver: React.FC = () => {
 
 					{Object.keys(screeners).length > 0 ? (
 						<>
-							<ul className="w-full grid grid-cols-2 grid-rows-5 justify-between items-center">
+							<ul className="grid grid-cols-2 grid-rows-5  max-h-64 overflow-y-auto">
 								{Object.entries(screeners).map(([k, v]) => (
-									<li key={k} id={`item-${k}`} className="flex gap-3 items-center">
+									<li key={k} id={`item-${k}`} className="p-1">
 										<form
-											className=""
+											className="flex justify-between"
 											id={`removeItem-${k}`}
 											onSubmit={(e) => removeItem(e, k)}>
-											<div className="">
-												<a href={v} target="_blank" rel="noopener noreferrer" className="">
+												<a href={v} target="_blank" rel="noopener noreferrer">
 													{k}
 												</a>
 												<button
@@ -170,7 +174,6 @@ const ScreenerSaver: React.FC = () => {
 												>
 													🗑️
 												</button>
-											</div>
 										</form>
 									</li>
 								))}
@@ -198,7 +201,7 @@ const ScreenerSaver: React.FC = () => {
 				)} */}
 
 			</section>
-			<section className="m-3 p-2 border-2 border-emerald-600 rounded">
+			<section className="mt-1 p-1 border-2 border-emerald-600 rounded">
 
 				<div className="flex items-center gap-3">
 					<h3 className="text-md font-bold">Comp. Fundamentals</h3>
@@ -235,8 +238,9 @@ const ScreenerSaver: React.FC = () => {
 						</div>
 					</>
 				)}
-
 			</section>
+
+					<button type="button" onClick={async () => await openSidePanel()}> Open Note </button>
 		</div>
 	);
 };

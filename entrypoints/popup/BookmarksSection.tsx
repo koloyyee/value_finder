@@ -6,7 +6,7 @@ import { Bookmarks } from "../types";
  * 
  */
 
-const SecBookmarks: React.FC = () => {
+const BookmarksSection: React.FC = () => {
 	const bookmarksStorage = new BookmarksStorageImp(chrome.storage.local);
 	const [bookmarks, setBookmarks] = useState<Map<string, [{ [key: string]: string }]>>(new Map());
 	const [errorMsg, setErrorMsg] = useState("");
@@ -65,25 +65,22 @@ const SecBookmarks: React.FC = () => {
 		renderList();
 	}
 
-	async function openSidePanel() {
-		const [tab] = await chrome.tabs.query({ active: true});
-		chrome.sidePanel.open({tabId : tab?.id as number})
-		window.close()
-	}
-
 	return (
-		<div className="m-2 p-3 border-2 border-emerald-600 rounded ">
+		<div className="w-max border-2 border-emerald-600 rounded">
 			{/* <button type="button" onClick={() => window.prompt()}>open</button> */}
 			<p className="text-red-500">{errorMsg}</p>
-			<form onSubmit={saveBookmark} className="flex gap-3">
-				<input name="ticker" placeholder="Ticker" className="py-2 rounded w-1/5" required />
-				<input name="bookmarkName" placeholder="Bookmark name e.g.: 2023-10q" className="py-2 rounded" required />
-				<button type="submit"> bookmark </button>
-				<button type="button" onClick={async () => await openSidePanel()}> Open Note </button>
-
+			<form onSubmit={saveBookmark} className="flex-col gap-1 p-1">
+				<section className="flex-col" >
+					<input name="ticker" placeholder="Ticker" className="rounded " required />
+					<input name="bookmarkName" placeholder="Bookmark name e.g.: 2023-10q" className="rounded" required />
+				</section>
+				<section className="flex gap-1">
+					<button type="submit"> bookmark </button>
+				</section>
 			</form>
+			<hr className="my-3 bg-emerald-600" />
 			{bookmarks.size > 0 ?
-				<ul className="h-36 overflow-y-auto grid grid-cols-2">
+				<ul className="grid grid-cols-2 max-h-96 overflow-y-auto px-2">
 					{Array.from(bookmarks.entries()).map(([ticker, bookmarkList], index) => (
 						<li key={ticker + index}>
 							<h4 className="font-bold" >{ticker}</h4>
@@ -91,7 +88,7 @@ const SecBookmarks: React.FC = () => {
 								{bookmarkList.map((bookmark, i) => (
 									<li key={i}>
 										{Object.keys(bookmark).map((name, i) => (
-											<form className="flex" onSubmit={(e) => removeBookmark(e)} key={name + i}>
+											<form className="flex justify-between px-[0.1rem]" onSubmit={(e) => removeBookmark(e)} key={name + i}>
 												<a href={bookmark[name]} key={i} target="_blank"> {name} </a>
 												<input name="url" type="hidden" value={bookmark[name]} />
 												<input name="ticker" type="hidden" value={ticker} />
@@ -114,4 +111,4 @@ const SecBookmarks: React.FC = () => {
 		</div>);
 }
 
-export default SecBookmarks;
+export default BookmarksSection;

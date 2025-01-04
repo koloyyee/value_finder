@@ -7,6 +7,7 @@ import { NotesStorageImp } from "../storage";
 import { Intent, Notes, SortValue } from "../types";
 
 function SidePanel() {
+	
 	const noteStorage = new NotesStorageImp(chrome.storage.local);
 	const [intent, setIntent] = useState<string>(Intent.create)
 
@@ -205,34 +206,39 @@ function SidePanel() {
 				open={isOpen}
 				onClose={toggleDrawer}
 				direction='bottom'
-				className='bla bla bla'
 				size={"95vh"}
-			>
-				<button type="button" onClick={toggleDrawer}>x</button>
-				<select onChange={(e) => sortList(e)}>
-					<option value="nameAsc">Name A-Z</option>
-					<option value="nameDesc">Name Z-A</option>
-					<option value="dateAsc">From Newest</option>
-					<option value="dateDesc">From Oldest</option>
-				</select>
-				<p>double click to confirm delete.</p>
-				{savedNotes !== undefined && savedNotes!.length > 0 ?
-					savedNotes.map((note: Notes) => (
-						<form className="rounded border-2 border-emerald-600 m-2 p-2">
-							<p>title: {note.title} </p>
-							{note.ticker !== null ?
-								< p > ticker: {note.ticker} </p>
-								:
-								<></>
-							}
-							<p className="truncate">note: {note.note} </p>
-							<p className="text-[0.5rem]">since: {note.lastUpdated}</p>
-							<button type="button" onClick={() => viewSavedNote(note)}>🔎</button>
-							<button type="button" onClick={() => deleteSavedNote(note)}>🗑️</button>
-						</form>
-					))
 
-					: <> No notes yet! :( </>}
+			>
+				<div className='dark:bg-zinc-800 dark:text-white p-3'>
+					<button type="button" onClick={toggleDrawer}>x</button>
+					<select onChange={(e) => sortList(e)}>
+						<option value="nameAsc">Name A-Z</option>
+						<option value="nameDesc">Name Z-A</option>
+						<option value="dateAsc">From Newest</option>
+						<option value="dateDesc">From Oldest</option>
+					</select>
+					<p>double click to confirm delete.</p>
+					<section className="h-screen overflow-y-auto pb-32" >
+
+						{savedNotes !== undefined && savedNotes!.length > 0 ?
+							savedNotes.map((note: Notes) => (
+								<form key={note.id + note.title} className="rounded border-2 border-emerald-600 m-2 p-2 ">
+									<p>title: {note.title} </p>
+									{note.ticker !== null ?
+										< p > ticker: {note.ticker} </p>
+										:
+										<></>
+									}
+									<p className="truncate">note: {note.note} </p>
+									<p className="text-[0.5rem]">since: {note.lastUpdated}</p>
+									<button type="button" onClick={() => viewSavedNote(note)}>🔎</button>
+									<button type="button" onClick={() => deleteSavedNote(note)}>🗑️</button>
+								</form>
+							))
+
+							: <> No notes yet! :( </>}
+					</section>
+				</div>
 			</Drawer>
 			{/* hidden list of notes on the bottom or on the side */}
 			download as csv

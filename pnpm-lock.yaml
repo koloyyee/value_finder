@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@wxt-dev/storage':
+        specifier: ^1.0.1
+        version: 1.0.1
       json-2-csv:
         specifier: ^5.5.7
         version: 5.5.7

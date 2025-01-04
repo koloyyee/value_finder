@@ -25,7 +25,10 @@ Save notes with source, quotes, ticker(optional), title, and note.
 Notes:
 [] - created at and updated to all the notes.
 [] - can be grouped by ticker,
-[] - support sort by title and ticker alphabetically, and created date chronologically.
+[] - create colour highlights and html attribute marking for persistent lookup.
+[] - create tags
+[] - search function in "Search by Ticker"
+[] - migrate from chrome storage to wxt/storage
 
 ## Suggestions?
 
@@ -46,10 +49,19 @@ while driving more traffics to Finviz.
 
 ## Goal
 
-When users are not on Finviz,
-users are able view the list of screener if there are any,
-else system will a message to signify the list is empty
-and encourage user to go to Finviz screener to save to their list.
+Value finder is a chrome extension for value investors who
+wants to conduct qualitative analysis through reading SEC filings,
+screener, and important links. The application supports note taking,
+and export whenever the user wants.
+
+Our goal is to help user to perform qualitative analysis through
+reading the fundamentals of a company.
+
+Currently Value Finder do not require registration nor AI support,
+in future we could add AI summary or check AI lookup of the companies
+while not requiring users to register.
+
+## Design Detail
 
 The screener list save with Chrome Storage API in Key-Value pair,
 which key and value are both unique
@@ -59,4 +71,18 @@ the screener input is cannot be empty
 and if the link is not on the Finviz screener page,
 when any of the above failed the input will not be saved
 
-This extension will support search by ticker and return the Finviz company page.
+### Ticker lookup and bookmarking
+
+This extension will support search by ticker and return the Finviz company page,
+with the sec 10k, 10q, 40f and 144 filing link. During the input of
+the ticker search, application should suggest ticker based on input ticker or
+input company name, or company cik.The application supports bookmarking and
+group by the ticker but no duplicate links allowed.
+
+### Note taking
+
+Value finder will support note taking features, user can highlight the text from html file and
+automatically shared to the side panel on the right, all the notes will have
+a title input, quote, note text field, optional ticker, and optional tagging.
+The notes can be export as a csv, text or json(?), can be exported
+a single note, group by ticker, group by tag, or all notes.

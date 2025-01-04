@@ -5,21 +5,6 @@ export default defineContentScript({
 	matches: ['<all_urls>'],
 	main() {
 
-
-		var intervalId = setInterval(() => {
-			if (!chrome.runtime?.id) {
-				// The extension was reloaded and this script is orphaned
-				clearInterval(intervalId);
-				return;
-			}
-
-			chrome.runtime.connect({ name: "textHighlight" })
-			chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-				// console.log(request, sender, sendResponse);
-				sendResponse('我收到你的消息了：' + JSON.stringify("request"));
-			});
-		}, 45000);
-
 		if (chrome.runtime?.id) {
 			const url = window.location.href;
 			passingTicker(url);

@@ -5,16 +5,13 @@ export default defineConfig({
   extensionApi: 'chrome',
   modules: ['@wxt-dev/module-react'],
 	manifest : {
-		version: "0.1",
+		version: "0.1.1",
 		name:"Value Finder",
 		description: "saving screeners, jotting notes, and bookmarking links for value investors",
 		permissions : [
 			"storage",
-			"activeTab",
-			// "tabs",
 			"sidePanel",
-			"contextMenus",
-			// "scripting",
+			"activeTab",
 			// "aiLanguageModelOriginTrial"
 		],
 		side_panel : {

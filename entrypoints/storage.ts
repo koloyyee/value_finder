@@ -1,4 +1,5 @@
 import { BookmarkKV, Bookmarks, Collection, Notes, Screeners } from "./types";
+// import { storage as wxtStorage } from '@wxt-dev/storage';
 
 export default defineUnlistedScript(() => { });
 
@@ -19,6 +20,7 @@ interface Storage {
 }
 
 export class NotesStorageImp implements Storage {
+	
 
 	private storage: chrome.storage.StorageArea
 	private collectionName: string;

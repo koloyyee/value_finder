@@ -1,6 +1,6 @@
 import { BASE, ScreenerStorageImpl } from "../storage";
 import { CompObj, Screeners } from "../types";
-import { extractTicker, insider, quarterAnnualWCik } from "./utils";
+import { extractTicker, insider, quarterAnnualWCik } from "../utils";
 
 import compTickers from "@/assets/company_tickers.json";
 

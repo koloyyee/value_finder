@@ -1,9 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { ScreenerStorageImpl } from "../storage";
-import { Collection } from "../types";
+import { Collection, StorageLocation } from "../types";
+import { ScreenerStorageImpl as WxtScreenerStorageImpl } from "../wxtstorage";
 
-const mock = new ScreenerStorageImpl(chrome.storage.local, Collection.mockNotes)
-
+	const mock  = new WxtScreenerStorageImpl(StorageLocation("local:", Collection.mockNotes))
 describe("Screener storage testing", () => {
 
 	beforeAll(async () => {

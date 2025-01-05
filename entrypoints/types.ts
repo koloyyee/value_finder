@@ -1,3 +1,5 @@
+import { StorageItemKey } from "@wxt-dev/storage";
+
 export default defineUnlistedScript(() => { });
 
 /** Types  */
@@ -5,10 +7,22 @@ export const Collection = {
 	screeners: "screeners" as const,
 	bookmarks: "bookmarks" as const,
 	notes: "notes" as const,
-	mockScreeners: "mock_screeners" as const,
-	mockBookmarks: "mock_bookmarks" as const,
-	mockNotes: "mock_notes" as const,
+	mockScreeners: "mockScreeners" as const,
+	mockBookmarks: "mockBookmarks" as const,
+	mockNotes: "mockNotes" as const,
 } as const;
+
+export const StorageLocation = (location: "local:" | "session:" | "sync:" | "managed:" = "local:", collectionName: keyof typeof Collection): StorageItemKey => {
+	switch (collectionName) {
+		case Collection.screeners:
+		case Collection.bookmarks:
+		case Collection.notes:
+		case "mockScreeners":
+		case "mockBookmarks":
+		case "mockNotes":
+			return location + collectionName as StorageItemKey;
+	}
+};
 
 export const Intent = {
 	create: "create" as const,
@@ -17,9 +31,9 @@ export const Intent = {
 } as const
 
 export const SortValue = {
-	nameAsc : "nameAsc" as const,
+	nameAsc: "nameAsc" as const,
 	nameDesc: "nameDesc" as const,
-	dateAsc : "dateAsc" as const,
+	dateAsc: "dateAsc" as const,
 	dateDesc: "dateDesc" as const
 }
 
@@ -93,5 +107,5 @@ export interface Notes {
 	ticker?: string
 	quote: string
 	note: string
-	lastUpdated: string 
+	lastUpdated: string
 }

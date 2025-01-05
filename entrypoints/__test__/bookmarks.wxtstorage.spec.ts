@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { BookmarksStorageImp } from "../storage";
-import { Collection } from "../types";
+import { Collection, StorageLocation } from "../types";
+import { BookmarksStorageImp as WxtBookmarksStorageImp } from "../wxtstorage";
 
-const mock = new BookmarksStorageImp(chrome.storage.local, Collection.mockNotes)
+const mock = new WxtBookmarksStorageImp(StorageLocation("local:", Collection.mockNotes))
 
 describe("Screener storage testing", () => {
 

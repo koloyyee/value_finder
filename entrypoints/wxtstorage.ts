@@ -1,4 +1,5 @@
-import { BookmarkKV, Bookmarks, Collection, Notes, Screeners } from "./types";
+import { StorageItemKey, WxtStorage } from "@wxt-dev/storage";
+import { BookmarkKV, Bookmarks, Notes, Screeners } from "./types";
 // import { storage as wxtStorage } from '@wxt-dev/storage';
 
 export default defineUnlistedScript(() => { });
@@ -21,12 +22,13 @@ interface Storage {
 
 export class NotesStorageImp implements Storage {
 
-	private storage: chrome.storage.StorageArea
-	private collectionName: string;
 
-	constructor(storage: chrome.storage.StorageArea, collectionName = "") {
-		this.storage = storage;
-		this.collectionName = collectionName.trim() === "" ? Collection.notes : collectionName;
+	private storage: WxtStorage
+	private collectionName: StorageItemKey;
+
+	constructor(collectionName: StorageItemKey) {
+		this.storage = storage as WxtStorage;
+		this.collectionName = collectionName
 	}
 
 	/**
@@ -35,14 +37,9 @@ export class NotesStorageImp implements Storage {
 	 * @param link 
 	 */
 	async save(title: string, newNote: Notes): Promise<{ err: string; } | { err: null; }> {
-		// allow duplicate
-		const collection = await this.storage.get(this.collectionName);
-		const notes = collection[this.collectionName] || []
-		notes.push(newNote)
-		const notesColl = {
-			[this.collectionName]: notes
-		}
-		await this.storage.set(notesColl)
+		const notes: Notes[] = await this.storage.getItem<Notes[]>(this.collectionName) ?? [];
+		notes?.push(newNote)
+		await this.storage.setItem<Notes[]>(this.collectionName, notes)
 
 		return { err: null }
 	}
@@ -56,9 +53,8 @@ export class NotesStorageImp implements Storage {
 		key?: string; value?: { [ticker: string]: string; } | string;
 	} = {}): Promise<Notes[] | undefined> {
 
-		const collection = await this.storage.get(this.collectionName);
-		let notes: [Notes] = collection[this.collectionName] || [];
-
+		const notes = await this.storage.getItem<Notes[]>(this.collectionName) ?? [];
+		(console.log({ key, value }))
 		// a note 
 		if (value instanceof Object) {
 			// console.log(value)
@@ -66,7 +62,7 @@ export class NotesStorageImp implements Storage {
 			const index = notes.findIndex(n =>
 				Object.keys(n).some(k => n[k] === value[k])
 			)
-			if( index === -1) {
+			if (index === -1) {
 				return [];
 			}
 			return [notes[index]]
@@ -88,55 +84,50 @@ export class NotesStorageImp implements Storage {
 	}
 
 	async update(id: string, newNote: Notes): Promise<{ err: null | string; }> {
-		const collection = await this.storage.get(this.collectionName);
-		const notes : [Notes] = collection[this.collectionName]
+		const notes = await this.storage.getItem<Notes[]>(this.collectionName) ?? [];
+		if (notes.length === 0) {
+			this.save("", newNote);
+			return { err: null }
+		}
 
 		const index = notes.findIndex((n) => n.id === id)
-		if( index === -1) {
-			return {err: `id: ${id} doesn't exist.`}
+		if (index === -1) {
+			return { err: `id: ${id} doesn't exist.` }
 		}
 		notes[index] = newNote;
 
-		await this.storage.set({
-			[this.collectionName] : notes
-		})
-		
+		await this.storage.setItem(this.collectionName, notes);
+
 		return { err: null }
 	}
+
 	async del(note: Notes): Promise<{ err: null | string; }> {
-		const collection = await this.storage.get(this.collectionName)
-		const notes = collection[this.collectionName] || []
+		const notes = await this.storage.getItem<Notes[]>(this.collectionName) ?? [];
 		const targetIndex = notes.findIndex((n: Notes) => {
-			return Object.keys(n).every(key => note[key] === n[key])
+			return Object.keys(n).every(key => notes[key] === n[key])
 		})
 		if (targetIndex === - 1) {
 			return { err: "no such note." }
 		}
 		notes.splice(targetIndex, 1);
-		await this.storage.set({
-			[this.collectionName]: notes
-		})
+		await this.storage.setItem(this.collectionName, notes);
 		return { err: null }
 	}
 	async clear(): Promise<void> {
-		await this.storage.set({
-			[this.collectionName] : []
-		})
+		await this.storage.removeItem(this.collectionName);
 	}
 
-	
+
 }
 
 export class BookmarksStorageImp implements Storage {
-	private collectionName: string;
-	private storage: chrome.storage.StorageArea;
 
-	constructor(
-		storage: chrome.storage.StorageArea,
-		collectionName = ""
-	) {
-		this.storage = storage;
-		this.collectionName = collectionName.trim() === "" ? this.collectionName = Collection.bookmarks : collectionName
+	private storage: WxtStorage
+	private collectionName: StorageItemKey;
+
+	constructor(collectionName: StorageItemKey) {
+		this.storage = storage as WxtStorage;
+		this.collectionName = collectionName
 	}
 
 	/**
@@ -155,30 +146,22 @@ export class BookmarksStorageImp implements Storage {
 		if (byLink !== undefined && Object.keys(byLink).length !== 0) {
 			return { err: "Bookmark Link existed already." };
 		}
-
-		const collection = await this.storage.get(this.collectionName);
-		const bookmarksColl = collection[this.collectionName] || {};
-
+		const bookmarksColl = await this.storage.getItem<BookmarkKV>(this.collectionName) ?? {};
+		
 		let collNewVal = {};
 		if (Object.keys(byTicker ?? {}).length === 0) {
-			console.log("new ticker ");
 			collNewVal = {
-				[this.collectionName]: {
-					...bookmarksColl,
-					[key]: [bookmarkKV],
-				},
+				...bookmarksColl,
+				[key]: [bookmarkKV],
 			};
 		} else {
 			collNewVal = {
-				[this.collectionName]: {
-					...bookmarksColl,
-					[key]: [...bookmarksColl[key], bookmarkKV],
-				},
+				...bookmarksColl,
+				[key]: [...bookmarksColl[key], bookmarkKV],
 			};
-			console.log(collNewVal);
 		}
 
-		await this.storage.set(collNewVal);
+		await this.storage.setItem(this.collectionName, collNewVal);
 		return { err: null };
 	}
 	/**
@@ -190,8 +173,7 @@ export class BookmarksStorageImp implements Storage {
 		Bookmarks | {} | undefined
 	> {
 		// get all.
-		const collection = await this.storage.get(this.collectionName);
-		const bookmarksColl = collection[this.collectionName] || {};
+		const bookmarksColl = await this.storage.getItem<BookmarkKV[]>(this.collectionName) ?? [];
 
 		if (key.trim() === "" && Object.keys(bookmarkKV).length === 0) {
 			return bookmarksColl;
@@ -233,8 +215,7 @@ export class BookmarksStorageImp implements Storage {
 	 */
 	async del(ticker: string, bookmarkName = "", url = "") {
 		try {
-			const collection = await this.storage.get();
-			const bookmarkColl = collection[this.collectionName];
+			const bookmarkColl = await this.storage.getItem(this.collectionName) ?? {};
 			const targetTicker = bookmarkColl[ticker];
 
 			if (targetTicker) {
@@ -249,9 +230,7 @@ export class BookmarksStorageImp implements Storage {
 					if (bookmarkColl[ticker].length === 0) {
 						delete bookmarkColl[ticker];
 					}
-					await this.storage.set({
-						[this.collectionName]: bookmarkColl,
-					});
+					await this.storage.setItem(this.collectionName, bookmarkColl);
 				}
 			}
 			return { err: null };
@@ -262,23 +241,20 @@ export class BookmarksStorageImp implements Storage {
 	}
 
 	async clear(): Promise<void> {
-		await this.storage.set({
-			[this.collectionName] : {}
-		})
+		await this.storage.removeItem(this.collectionName)
 	}
 }
 
 export class ScreenerStorageImpl implements Storage {
-	private collectionName: string;
-	private storage: chrome.storage.StorageArea;
 
-	constructor(
-		storage: chrome.storage.StorageArea,
-		collectionName = "",
-	) {
-		this.storage = storage;
-		this.collectionName = collectionName.trim() === "" ? this.collectionName = Collection.screeners : collectionName
+	private storage: WxtStorage
+	private collectionName: StorageItemKey;
+
+	constructor(collectionName: StorageItemKey) {
+		this.storage = storage as WxtStorage;
+		this.collectionName = collectionName
 	}
+
 
 	/**
 	 *
@@ -307,13 +283,10 @@ export class ScreenerStorageImpl implements Storage {
 			return { err: "Screener Filter existed already." };
 		}
 
-		const collection = await this.storage.get(this.collectionName);
-		const targetCollection = collection[this.collectionName] || {};
-		await this.storage.set({
-			[this.collectionName]: {
-				...targetCollection,
-				[key]: link,
-			},
+		const targetCollection = await this.storage.getItem<Screeners>(this.collectionName) ?? {};
+		await this.storage.setItem(this.collectionName, {
+			...targetCollection,
+			[key]: link,
 		});
 		return { err: null };
 	}
@@ -324,8 +297,7 @@ export class ScreenerStorageImpl implements Storage {
 	 *
 	 */
 	async get({ key = "", url = "" } = {}): Promise<Screeners | undefined> {
-		const collection = await this.storage.get(this.collectionName);
-		const screenerColl = collection[this.collectionName] || {};
+		const screenerColl = await this.storage.getItem<Screeners>(this.collectionName) ?? {};
 
 		if (key.trim() === "" && url.trim() === "") {
 			return screenerColl;
@@ -344,13 +316,10 @@ export class ScreenerStorageImpl implements Storage {
 		}
 	}
 	async del(key: string) {
-		const collection = await this.storage.get(this.collectionName);
-		const targetCollection = collection[this.collectionName] || {};
+		const targetCollection = await this.storage.getItem<Screeners>(this.collectionName) ?? {};
 		try {
 			delete targetCollection[key];
-			await this.storage.set({
-				[this.collectionName]: targetCollection,
-			});
+			await this.storage.setItem(this.collectionName, targetCollection);
 			return { err: null };
 		} catch (e) {
 			console.error(e);
@@ -358,8 +327,6 @@ export class ScreenerStorageImpl implements Storage {
 		}
 	}
 	async clear() {
-		await this.storage.set({
-			[this.collectionName]: {},
-		});
+		await this.storage.removeItem(this.collectionName);
 	}
 }

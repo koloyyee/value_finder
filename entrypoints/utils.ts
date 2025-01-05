@@ -32,3 +32,4 @@ export function parseDate(dateString: string): Date {
 	const [hrs, mins, secs] = time.split(":").map(Number)
 	return new Date(year, month - 1, day, hrs, mins, secs)
 }
+

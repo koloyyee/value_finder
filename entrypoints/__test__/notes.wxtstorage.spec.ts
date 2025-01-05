@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { NotesStorageImp } from "../storage";
-import { Collection, Notes } from "../types";
+import { Collection, Notes, StorageLocation } from "../types";
+import { NotesStorageImp as WxtNotesStorage } from "../wxtstorage";
 
-const mock = new NotesStorageImp(chrome.storage.local, Collection.mockNotes)
+const mock = new WxtNotesStorage(StorageLocation("local:", Collection.mockNotes))
 
 describe("Chrome Notes storage testing", () => {
 

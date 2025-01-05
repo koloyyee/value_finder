@@ -1,4 +1,4 @@
-import { extractTicker } from "./popup/utils";
+import { extractTicker } from "./utils";
 
 export default defineContentScript({
 	// matches: ['*://finviz.com/*'],

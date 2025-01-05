@@ -17,6 +17,13 @@ const BookmarksSection: React.FC = () => {
 		renderList();
 	}, [])
 
+	const showErrorMsg = (err: string) => {
+		setErrorMsg(err);
+		setTimeout(() => {
+			setErrorMsg("")
+		}, 1000)
+	}
+
 	async function renderList() {
 		const collection = await bookmarksStorage.get() as Bookmarks
 		const bookmarkMap = new Map();
@@ -42,7 +49,7 @@ const BookmarksSection: React.FC = () => {
 			if (err === null) {
 				form.reset();
 			} else {
-				setErrorMsg(err);
+				showErrorMsg(err);
 			}
 		}
 		renderList()
@@ -66,13 +73,15 @@ const BookmarksSection: React.FC = () => {
 	}
 
 	return (
-		<div className="w-max border-2 border-emerald-600 rounded">
+		<div className="w-max p-1 border-2 border-emerald-600 rounded">
+			
+				<h3 className="text-lg font-bold" >Bookmarks</h3>
 			{/* <button type="button" onClick={() => window.prompt()}>open</button> */}
-			<p className="text-red-500">{errorMsg}</p>
+			<p id="errorMsg" className=" text-pink-500" aria-label='error-message'>{errorMsg}</p>
 			<form onSubmit={saveBookmark} className="flex-col gap-1 p-1">
-				<section className="flex-col" >
-					<input name="ticker" placeholder="Ticker" className="rounded " required />
-					<input name="bookmarkName" placeholder="Bookmark name e.g.: 2023-10q" className="rounded" required />
+				<section className="flex gap-2" >
+					<input name="ticker" placeholder="Ticker" className="rounded w-1/3" required />
+					<input name="bookmarkName" placeholder="name e.g.: 2023-10q" className="rounded w-max" required />
 				</section>
 				<section className="flex gap-1">
 					<button type="submit"> bookmark </button>

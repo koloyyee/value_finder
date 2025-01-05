@@ -2,9 +2,9 @@ import { json2csv } from "json-2-csv";
 import { ChangeEvent } from "react";
 import Drawer from 'react-modern-drawer';
 import 'react-modern-drawer/dist/index.css';
-import { parseDate } from "../popup/utils";
 import { NotesStorageImp } from "../storage";
 import { Intent, Notes, SortValue } from "../types";
+import { parseDate } from "../utils";
 
 function SidePanel() {
 	

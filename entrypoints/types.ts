@@ -43,13 +43,18 @@ export const SortValue = {
  *	cik_str: 320193, 
  *  ticker: 'AAPL', 
  *  title: 'Apple Inc.'
+ * 	quarterAnnual: "https://www.sec.gov/edgar/search/#/category=custom&entityName=AAPL&forms=10-K%252C10-Q%252C20-F%252C40-F",
+ * 	insider: "https://www.sec.gov/edgar/search/#/category=custom&entityName=AAPL&forms=144"
  * }
  */
 export type CompObj = {
 	cik_str: number,
 	ticker: string,
 	title: string,
+	quarterAnnual?: string,
+	insider?: string,
 }
+
 
 /**
  * bookmarks : {

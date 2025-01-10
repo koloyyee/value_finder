@@ -114,7 +114,7 @@ export class NotesStorageImp implements Storage {
 		return { err: null }
 	}
 	async clear(): Promise<void> {
-		await this.storage.removeItem(this.collectionName);
+		await this.storage.removeMeta(this.collectionName);
 	}
 
 
@@ -241,7 +241,7 @@ export class BookmarksStorageImp implements Storage {
 	}
 
 	async clear(): Promise<void> {
-		await this.storage.removeItem(this.collectionName)
+		await this.storage.removeMeta(this.collectionName)
 	}
 }
 
@@ -327,6 +327,6 @@ export class ScreenerStorageImpl implements Storage {
 		}
 	}
 	async clear() {
-		await this.storage.removeItem(this.collectionName);
+		await this.storage.removeMeta(this.collectionName);
 	}
 }

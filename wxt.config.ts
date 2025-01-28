@@ -15,7 +15,7 @@ export default defineConfig({
 			// "aiLanguageModelOriginTrial"
 		],
 		side_panel : {
-			default_path : "/sidepanel.html"
+			default_path : "/sidepanel.html",
 		},
 		action :{
 			"default_title": "Click to open panel"

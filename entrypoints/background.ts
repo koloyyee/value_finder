@@ -1,4 +1,6 @@
-import { Collection } from "./types";
+import { onMessage } from "./message";
+import { Collection, StorageLocation } from "./types";
+import { ScreenerStorageImpl } from "./wxtstorage";
 
 export default defineBackground(() => {
 
@@ -6,20 +8,21 @@ export default defineBackground(() => {
 		retransmit();
 		// (async () => openSidePanel())();
 		// contextMenuOpenPanel();
+
 	})
-		var intervalId = setInterval(() => {
-			// console.log("polling in background.ts")
-			if (!chrome.runtime?.id) {
-				// The extension was reloaded and this script is orphaned
-				clearInterval(intervalId);
-				return;
-			}
-			chrome.tabs.query({active: true, currentWindow: true},function(tabs) {
-				chrome.tabs.sendMessage(tabs[0].id as number, {greeting: "hello"}, function(response) {
-						console.log(response);
-				});
-			}); 
-		}, 45000);
+		// var intervalId = setInterval(() => {
+		// 	// console.log("polling in background.ts")
+		// 	if (!chrome.runtime?.id) {
+		// 		// The extension was reloaded and this script is orphaned
+		// 		clearInterval(intervalId);
+		// 		return;
+		// 	}
+		// 	chrome.tabs.query({active: true, currentWindow: true},function(tabs) {
+		// 		chrome.tabs.sendMessage(tabs[0].id as number, {greeting: "hello"}, function(response) {
+		// 				console.log(response);
+		// 		});
+		// 	}); 
+		// }, 45000);
 });
 
 
@@ -42,6 +45,7 @@ async function openSidePanel() {
 
 
 function retransmit() {
+
 	chrome.runtime.onConnect.addListener((port) => {
 		port.onDisconnect.addListener(() => {
 			if (chrome.runtime.lastError) {
@@ -68,7 +72,7 @@ function retransmit() {
 		});
 	});
 	(async () => {
-		screenersCollectionChecker();
+		await screenersCollectionChecker();
 	})();
 }
 function sendTicker(ticker: string) {
@@ -77,13 +81,9 @@ function sendTicker(ticker: string) {
 	})
 }
 
-async function screenersCollectionChecker() {
-	const coll = await chrome.storage.local.get(Collection.screeners);
-	if (Object.keys(coll).length === 0) {
-		await chrome.storage.local.set({ [Collection.screeners]: {} });
-	} else {
-		console.log({ coll })
-	}
+async function screenersCollectionChecker(): Promise<void> {
+	const storage = new ScreenerStorageImpl(StorageLocation("local:", Collection.screeners));
+	await storage.get();
 }
 
 
@@ -110,3 +110,8 @@ async function contextMenuOpenPanel() {
 
 
 }
+
+onMessage("getStringLength", message => {
+	console.log("Calling message from background.ts ")
+	return message.data.length
+})

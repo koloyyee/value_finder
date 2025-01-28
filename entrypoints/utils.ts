@@ -1,6 +1,9 @@
 import compTickers from "@/assets/company_tickers.json";
 import { CompObj } from "./types";
 
+
+export default defineUnlistedScript(() => { });
+
 export function extractTicker(url: string) {
 	const regex = /t=([a-zA-Z-]+)&/;
 	const match = regex.exec(url);
@@ -12,6 +15,8 @@ export function extractTicker(url: string) {
 	}
 }
 /**
+ *
+ * 
  * The function will support both ticker and title,
  * that supports incomplete input.
  * 
@@ -28,7 +33,7 @@ export function extractTicker(url: string) {
  * ]
  */
 export function searchCompanies(input: string) {
-
+	// TODO: continue with the start with search.
 	const field = input.includes(" ") ? "title" : "ticker";
 
 	// const compObj = Object.values(compTickers).find((obj: CompObj) => obj[field].includes(input.toUpperCase()));
@@ -51,7 +56,7 @@ export function extractCompany(input: string): CompObj | undefined {
 	// determine it is ticker or title.
 	const field = input.includes(" ") ? "title" : "ticker";
 	return Object.values(compTickers).find((obj: CompObj) => obj[field].includes(input.toUpperCase()));
-	
+
 }
 
 export const quarterAnnual = (ticker: string) => `https://www.sec.gov/edgar/search/#/category=custom&entityName=${ticker}&forms=10-K%252C10-Q%252C20-F%252C40-F`;

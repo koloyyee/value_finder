@@ -47,10 +47,12 @@ export const SortValue = {
  * 	insider: "https://www.sec.gov/edgar/search/#/category=custom&entityName=AAPL&forms=144"
  * }
  */
-export type CompObj = {
+export type comp = {
 	cik_str: number,
 	ticker: string,
 	title: string,
+}
+export interface CompObj extends comp {
 	quarterAnnual?: string,
 	insider?: string,
 }

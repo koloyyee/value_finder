@@ -297,6 +297,7 @@ export class ScreenerStorageImpl implements Storage {
 	 *
 	 */
 	async get({ key = "", url = "" } = {}): Promise<Screeners | undefined> {
+
 		const screenerColl = await this.storage.getItem<Screeners>(this.collectionName) ?? {};
 
 		if (key.trim() === "" && url.trim() === "") {

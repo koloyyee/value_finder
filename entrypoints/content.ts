@@ -1,3 +1,4 @@
+import { sendMessage } from "./message";
 import { extractTicker } from "./utils";
 
 export default defineContentScript({
@@ -11,13 +12,22 @@ export default defineContentScript({
 			document.onmouseup = getSelection
 
 		}
+
+	
 	}
 
 });
 
+// example
+(async () => {
+	const length = await sendMessage('getStringLength', 'hello world');
+	console.log(length)
+})()
+
 function passingTicker(url: string) {
 	const href = document.querySelector(".quote-header_ticker-wrapper_company")?.querySelector("a")?.getAttribute("href");
 	const ticker = extractTicker(url);
+
 	if (ticker && href) {
 		if (chrome.runtime?.id) {
 			const port = chrome.runtime.connect({ name: "comp" });
@@ -25,7 +35,6 @@ function passingTicker(url: string) {
 		}
 	}
 }
-
 
 
 
@@ -105,3 +114,4 @@ function highlightText(selection: Selection) {
 	span.appendChild(selectedText);
 	range.insertNode(span);
 }
+

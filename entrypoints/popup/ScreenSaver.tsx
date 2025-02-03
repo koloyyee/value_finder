@@ -16,15 +16,14 @@ const ScreenerSaver: React.FC = () => {
 	const [isFinvizPage, setIsFinvizPage] = useState(false);
 	const [insiderFiling, setInsiderFiling] = useState("")
 
-	// const tickersDB = compTickers.values();
-	// console.log(Object.values(compTickers))
-
 	useEffect(() => {
 		(async () => {
 			const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 			const ticker = extractTicker(tab.url!) ?? "";
+			
+			// TODO: needs to run tests.
+			const compObj: CompObj | undefined = Object.values(compTickers).find(obj => obj.ticker.includes(ticker.toUpperCase()));
 
-			const compObj: CompObj | undefined = Object.values(compTickers).find(obj => obj.ticker === ticker.toUpperCase());
 			if (compObj) {
 				setSecReportUrl(quarterAnnualWCik(compObj.ticker, compObj.cik_str))
 				setInsiderFiling(insider(compObj.ticker))
@@ -135,10 +134,8 @@ const ScreenerSaver: React.FC = () => {
 
 	return (
 		<div className="w-max">
-
 			<section className="my-1 p-1 border-2 border-emerald-600 rounded">
 				<div className="flex flex-col gap-2 mx-1" >
-
 					<h3 className="text-lg font-bold"> Company Search</h3>
 					<SearchTicker />
 					<button className="flex ml-auto" type="button" onClick={async () => await openSidePanel()}> Open Note </button>
@@ -164,9 +161,7 @@ const ScreenerSaver: React.FC = () => {
 			</section>
 			<p id="errorMsg" className=" text-pink-500" aria-label='error-message'> {errorMsg} </p>
 			<section className="p-2 border-2 border-emerald-600 rounded">
-
 				<h3 className="text-lg font-bold" >Screeners </h3>
-
 				<form
 					id="favoritesForm"
 					onSubmit={favoritesFormHandler}

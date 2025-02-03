@@ -116,11 +116,11 @@ onMessage("getStringLength", message => {
 	return message.data.length
 })
 
-// TODO: highlight in pdf
-chrome.tabs.query({active: true, currentWindow: true}, ([tab]) => {
-  chrome.tabs.sendMessage(tab.id, 'getPdfSelection', sel => {
+// // TODO: highlight in pdf
+// chrome.tabs.query({active: true, currentWindow: true}, ([tab]) => {
+//   chrome.tabs.sendMessage(tab.id, 'getPdfSelection', sel => {
 
-		console.log({sel})
-    // do something
-  });
-});
+// 		console.log({sel})
+//     // do something
+//   });
+// });

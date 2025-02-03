@@ -23,12 +23,13 @@ Save notes with source, quotes, ticker(optional), title, and note.
 ## TODO
 
 Notes:
+[] - get select from pdf.
 [] - created at and updated to all the notes.
 [] - can be grouped by ticker,
 [] - create colour highlights and html attribute marking for persistent lookup.
 [] - create tags
-[] - search function in "Search by Ticker"
-[] - migrate from chrome storage to wxt/storage
+[x] - search function in "Search by Ticker"
+[x] - migrate from chrome storage to wxt/storage
 
 ## Suggestions?
 

@@ -21,5 +21,12 @@ export default defineConfig({
 			"default_title": "Click to open panel"
 		},
 		// minimum_chrome_version: "131",
+		web_accessible_resources : [
+			{
+				resources: ["query-pdf.js"],
+				matches: ["<all_urls>"]
+			}
+		]
+
 	}
 });

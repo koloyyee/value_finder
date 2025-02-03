@@ -135,6 +135,33 @@ const ScreenerSaver: React.FC = () => {
 
 	return (
 		<div className="w-max">
+
+			<section className="my-1 p-1 border-2 border-emerald-600 rounded">
+				<div className="flex flex-col gap-2 mx-1" >
+
+					<h3 className="text-lg font-bold"> Company Search</h3>
+					<SearchTicker />
+					<button className="flex ml-auto" type="button" onClick={async () => await openSidePanel()}> Open Note </button>
+					{currTicker && (
+						<>
+							<hr className='my-1' />
+							<h3 className="text-md font-bold">Company Filings: 	<span className="font-semi text-[1.0rem]">{currTicker.toUpperCase()}</span></h3>
+							<div className=" border-b-2 border-emerald-600 rounded">
+
+								<a href={secReportUrl} target="_blank">  Quarter & Annual (10Q&10K) </a>
+								<span className="text-pink-700">|</span>
+								<a href={insiderFiling} target="_blank"> Insider(144) </a>
+								{companyUrl && (
+									<>
+										<span className="text-pink-700">|</span>
+										<a href={companyUrl} target="_blank"> Homepage / IR</a>
+									</>
+								)}
+							</div>
+						</>
+					)}
+				</div>
+			</section>
 			<p id="errorMsg" className=" text-pink-500" aria-label='error-message'> {errorMsg} </p>
 			<section className="p-2 border-2 border-emerald-600 rounded">
 
@@ -155,7 +182,7 @@ const ScreenerSaver: React.FC = () => {
 					/>
 					<button type="submit">Save</button>
 				</form>
-				<div className="mt-4 min-h-12 overflow-y-auto">
+				<div className="mt-4 min-h-72 overflow-y-auto">
 
 					{Object.keys(screeners).length > 0 ? (
 						<>
@@ -190,40 +217,7 @@ const ScreenerSaver: React.FC = () => {
 						Go to Finviz Screener
 					</a>
 				</div>
-
-				{/* {Object.keys(screeners).length > 0 && (
-					<button
-						id="clear_list"
-						onClick={clearList}
-						className="mt-4 hover:bg-red-600 hover:text-white rounded"
-					>
-						Clear List
-					</button>
-				)} */}
-
 			</section>
-			<section className="mt-1 p-1 border-2 border-emerald-600 rounded">
-				<SearchTicker />
-				{currTicker && (
-					<>
-						<hr className='my-2' />
-						<div className="p-1 m-3 border-b-2 border-emerald-600 rounded">
-							<span className="font-semi text-[1.0rem]">{currTicker}: </span>
-							<a href={secReportUrl} target="_blank">  Quarter & Annual (10Q&10K) </a>
-							<span className="text-pink-700">|</span>
-							<a href={insiderFiling} target="_blank"> Insider(144) </a>
-							{companyUrl && (
-								<>
-									<span className="text-pink-700">|</span>
-									<a href={companyUrl} target="_blank"> Homepage / IR</a>
-								</>
-							)}
-						</div>
-					</>
-				)}
-			</section>
-
-			<button type="button" onClick={async () => await openSidePanel()}> Open Note </button>
 		</div>
 	);
 };
@@ -260,22 +254,22 @@ function SearchTicker() {
 	}
 
 	return (
-		<div className="flex items-center gap-3">
-			<h3 className="text-md font-bold">Comp. Fundamentals</h3>
+		<div className="flex items-center gap-3 ">
 			<form
 				id="tickerForm"
 				onSubmit={tickerFormHandler}
-				className="flex gap-3"
+				className="flex gap-3 justify-between w-max"
 			>
 				<input
 					id="tickerInput"
 					type="text"
 					name="ticker"
 					placeholder="Enter Ticker"
-					className=" rounded"
+					className=" rounded min-w-48"
 					required
 					onChange={(e) => debounceSearch(e)}
 				/>
+
 				{searchedComps && searchedComps.length > 0 && (
 					<div className="absolute bg-white dark:bg-slate-700 text-slate-800 dark:text-gray-300 border rounded mt-12 max-h-60 overflow-y-auto z-10">
 						{searchedComps.map((result, index) => (
@@ -297,6 +291,7 @@ function SearchTicker() {
 				)}
 				<button type="submit">Search by Ticker</button>
 			</form>
+
 		</div>
 	);
 }

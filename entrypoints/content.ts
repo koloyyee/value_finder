@@ -10,10 +10,8 @@ export default defineContentScript({
 			const url = window.location.href;
 			passingTicker(url);
 			document.onmouseup = getSelection
-
-		}
-
-	
+			document.onmouseup = getPdfSelectedText
+		}	
 	}
 
 });
@@ -42,7 +40,6 @@ function passingTicker(url: string) {
  * User can highlight the text and highlighted text will send to the side panel.
  */
 async function getSelection() {
-
 	const selection = window.getSelection();
 
 	if (selection) {
@@ -115,3 +112,34 @@ function highlightText(selection: Selection) {
 	range.insertNode(span);
 }
 
+// example
+function getPdfSelectedText() {
+  return new Promise(resolve => {
+    window.addEventListener('message', function onMessage(e) {
+      if (e.origin === 'chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai' &&
+          e.data && e.data.type === 'getSelectedTextReply') {
+        window.removeEventListener('message', onMessage);
+        resolve(e.data.selectedText);
+      }
+    });
+    // runs code in page context to access postMessage of the embedded plugin
+    const script = document.createElement('script');
+    if (chrome.runtime.getManifest().manifest_version > 2) {
+      script.src = chrome.runtime.getURL('query-pdf.js');
+    } else {
+      script.textContent = `(${() => {
+        document.querySelector('embed').postMessage({type: 'getSelectedText'}, '*');
+      }})()`;
+    }
+    document.documentElement.appendChild(script);
+    script.remove();
+  });
+}
+
+// TODO: highlight in pdf
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg === 'getPdfSelection') {
+    getPdfSelectedText().then(sendResponse);
+    return true;
+  }
+});

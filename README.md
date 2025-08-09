@@ -1,6 +1,8 @@
 # Value Seeker Chrome Extension
 
-Stock Screener (Finviz):
+Chrome Store: [Value Finder](https://chromewebstore.google.com/detail/value-finder/gkcejdcbheaekdbellfmbcehcnmhbmig)
+
+## Stock Screener (Finviz):
 
 Finviz is a great place to search for stocks,
 especially with a their great stock screener,
@@ -16,7 +18,7 @@ Business Summary (AI):
 
 Highlight text, right-click and summarize -->
 
-Note taking:
+### Note taking:
 
 Save notes with source, quotes, ticker(optional), title, and note.
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import BookmarksSection from './BookmarksSection';
-import ScreenerSaver from './ScreenSaver';
+import BookmarksSection from './bookmark-section';
+import ScreenerSaver from './screen-saver';
 
 const App: React.FC = () => {
 	return (

@@ -44,6 +44,13 @@ async function openSidePanel() {
 }
 
 
+/**
+ * Message relay.
+ * 
+ * Sets up a message relay hub for Chrome extension ports,
+ * from company ticker get file links from EDGAR.
+ * 
+ */
 function retransmit() {
 
 	chrome.runtime.onConnect.addListener((port) => {
@@ -81,6 +88,9 @@ function sendTicker(ticker: string) {
 	})
 }
 
+/**
+ * Get the finviz screener from local storage
+ */
 async function screenersCollectionChecker(): Promise<void> {
 	const storage = new ScreenerStorageImpl(StorageLocation("local:", Collection.screeners));
 	await storage.get();

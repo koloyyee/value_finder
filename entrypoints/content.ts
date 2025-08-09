@@ -10,18 +10,24 @@ export default defineContentScript({
 			const url = window.location.href;
 			passingTicker(url);
 			document.onmouseup = getSelection
-			document.onmouseup = getPdfSelectedText
-		}	
+			// document.onmouseup = getPdfSelectedText
+		}
 	}
 
 });
 
-// example
+// test
 (async () => {
 	const length = await sendMessage('getStringLength', 'hello world');
 	console.log(length)
 })()
 
+/**
+ * Message Publisher.
+ * 
+ * Message passing of a company ticker  
+ * @param url 
+ */
 function passingTicker(url: string) {
 	const href = document.querySelector(".quote-header_ticker-wrapper_company")?.querySelector("a")?.getAttribute("href");
 	const ticker = extractTicker(url);
@@ -112,34 +118,50 @@ function highlightText(selection: Selection) {
 	range.insertNode(span);
 }
 
-// example
-function getPdfSelectedText() {
-  return new Promise(resolve => {
-    window.addEventListener('message', function onMessage(e) {
-      if (e.origin === 'chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai' &&
-          e.data && e.data.type === 'getSelectedTextReply') {
-        window.removeEventListener('message', onMessage);
-        resolve(e.data.selectedText);
-      }
-    });
-    // runs code in page context to access postMessage of the embedded plugin
-    const script = document.createElement('script');
-    if (chrome.runtime.getManifest().manifest_version > 2) {
-      script.src = chrome.runtime.getURL('query-pdf.js');
-    } else {
-      script.textContent = `(${() => {
-        document.querySelector('embed').postMessage({type: 'getSelectedText'}, '*');
-      }})()`;
-    }
-    document.documentElement.appendChild(script);
-    script.remove();
-  });
-}
+/**
+ * 1. How can I know I am access a pdf file in Chrome?
+ * 2. How to get the selection text from the pdf file? will window.getSelection() work?
+ */
 
-// TODO: highlight in pdf
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg === 'getPdfSelection') {
-    getPdfSelectedText().then(sendResponse);
-    return true;
-  }
-});
+// from claude.ai
+// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+// 	if (message.text) {
+// 		const outputElement = document.getElementById('output');
+// 		if (outputElement) {
+// 			outputElement.textContent = message.text;
+// 		}
+// 	}
+// });
+// [type="application/x-google-chrome-pdf"] is the default PDF viewer in Chrome
+// export function extractTextFromPDF() {
+// 	// Check if we're in a PDF viewer
+// 	if (document.body.querySelector('embed[type="application/pdf"]')) {
+// 		// Get the PDF viewer iframe
+// 		const pdfViewer = document.body.querySelector('embed[type="application/pdf"]');
+
+// 		// Get selected text
+// 		const selection = window.getSelection();
+// 		const selectedText = selection?.toString();
+
+// 		if (selectedText) {
+// 			console.log('Selected text:', selectedText);
+// 			// You can send this back to popup.js using chrome.runtime.sendMessage
+// 			chrome.runtime.sendMessage({ text: selectedText });
+// 		} else {
+// 			console.log('No text selected');
+// 		}
+// 	}
+// }
+
+// function pdf() {
+// 	console.log("hello")
+// 	document.getElementById('extractText')?.addEventListener('click', async () => {
+// 		const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+// 		chrome.scripting.executeScript({
+// 			target: { tabId: tab.id! },
+// 			func: extractTextFromPDF,
+// 		});
+// 	});
+// }
+// pdf()

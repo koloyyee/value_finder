@@ -1,9 +1,11 @@
 import { BookmarkKV, Bookmarks, Collection, Notes, Screeners } from "./types";
 // import { storage as wxtStorage } from '@wxt-dev/storage';
 
+/**
+ * To be replaced by WXT storage.
+ */
 export default defineUnlistedScript(() => { });
 
-/** Logics  **/
 export const BASE = "https://finviz.com/screener.ashx";
 
 interface Storage {

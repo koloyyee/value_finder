@@ -8,9 +8,10 @@ import { Intent, Notes, SortValue } from "../types";
 import { parseDate } from "../utils";
 
 function SidePanel() {
-	
+
 	const noteStorage = new NotesStorageImp(chrome.storage.local);
 	const [intent, setIntent] = useState<string>(Intent.create)
+
 
 
 	// Note data send from message passing port.
@@ -25,6 +26,7 @@ function SidePanel() {
 
 	const [savedNotes, setSavedNotes] = useState<Notes[] | undefined>([]);
 
+	// Message subscriber
 	useEffect(() => {
 		function getHighlighted() {
 			chrome.runtime.onConnect.addListener(port => {
